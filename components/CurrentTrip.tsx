@@ -1,10 +1,10 @@
 import React from "react";
 import { Text, View } from "react-native";
 
-export default function Index() {
+export default function CurrentTrip() {
   return (
     <View>
-      <Text>Index</Text>
+      <Text>CurrentTrip</Text>
     </View>
   );
 }
