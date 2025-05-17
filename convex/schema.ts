@@ -18,7 +18,6 @@ export default defineSchema({
     description: v.optional(v.string()),
     adminId: v.string(),
     locationId: v.optional(v.string()),
-    difficulty: v.number(),
     joinCode: v.string(),
   })
     .index("by_admin", ["adminId"])
@@ -28,7 +27,6 @@ export default defineSchema({
     name: v.string(),
     description: v.optional(v.string()),
     locationId: v.optional(v.string()),
-    difficulty: v.number(),
     users: v.array(v.string()),
     photos: v.optional(v.array(v.string())),
   }),
@@ -45,22 +43,19 @@ export default defineSchema({
     longitude: v.number(),
     latitude: v.number(),
     description: v.string(),
-    difficulty: v.number(),
-    photos: v.array(v.string()), // URLs
-  })
-    .index("by_difficulty", ["difficulty"])
-    .index("by_name", ["name"]),
+    photos: v.string(), // URLs
+  }).index("by_name", ["name"]),
 
   animals: defineTable({
     name: v.string(),
     photo: v.string(),
-    description: v.optional(v.string()),
+    description: v.string(),
   }),
 
   plants: defineTable({
     name: v.string(),
     photo: v.string(),
-    description: v.optional(v.string()),
+    description: v.string(),
   }),
 
   location_animals: defineTable({
@@ -75,10 +70,11 @@ export default defineSchema({
 
   tutorials: defineTable({
     title: v.string(),
+    type: v.string(),
     content: v.array(
       v.object({
-        isText: v.boolean(), // map them one by one text then image
-        value: v.string(),
+        text: v.string(), // map them one by one text then image
+        photo: v.string(),
       })
     ),
   }),
@@ -91,8 +87,8 @@ export default defineSchema({
         completed: v.boolean(),
       })
     ),
-    difficulty: v.optional(v.number()),
+    preset: v.boolean(),
   })
     .index("by_trip", ["tripId"])
-    .index("by_difficulty", ["difficulty"]),
+    .index("by_preset", ["preset"]),
 });
