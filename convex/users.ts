@@ -257,3 +257,57 @@ export const getUsersWithPhotosByTripId = query({
     return usersWithPhotos;
   },
 });
+
+export const getUsersWithPhotosByPastTripId = query({
+  args: { pastTripId: v.id("past_trips") },
+  handler: async (ctx, args) => {
+    // Get all user IDs for this past trip from past_trip_users table
+    const pastTripUserEntries = await ctx.db
+      .query("past_trip_users")
+      .withIndex("by_trip_and_user", (q) =>
+        q.eq("tripId", args.pastTripId.toString())
+      )
+      .collect();
+
+    // Extract the userIds
+    const userIds = pastTripUserEntries.map((entry) => entry.userId);
+
+    // Get all the user data
+    const users = await Promise.all(
+      userIds.map(async (userId) => {
+        // Since userId is stored as a string, we need to query by field or convert to ID
+        return await ctx.db
+          .query("users")
+          .filter((q) => q.eq(q.field("_id"), userId))
+          .unique();
+      })
+    );
+
+    // Filter out any null values and add photo URLs
+    const usersWithPhotos = await Promise.all(
+      users
+        .filter((user) => user !== null)
+        .map(async (user) => {
+          // Cast the storage ID to the proper type
+          const photoId = (user.photo as Id<"_storage">) || null;
+          let photoUrl = null;
+
+          if (photoId) {
+            photoUrl = await ctx.storage.getUrl(photoId);
+          } else {
+            // For default photo, also use proper typing
+            const defaultPhotoId =
+              "kg2f6gfmq2vvdbehah7bg1eh497g036z" as Id<"_storage">;
+            photoUrl = await ctx.storage.getUrl(defaultPhotoId);
+          }
+
+          return {
+            ...user,
+            photoUrl,
+          };
+        })
+    );
+
+    return usersWithPhotos;
+  },
+});

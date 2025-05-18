@@ -167,7 +167,6 @@ export const completeTrip = mutation({
       description: trip.description,
       locationId: trip.locationId,
       isCustom: trip.isCustom,
-      users: tripUsers.map((user) => user._id.toString()),
       photos: [], // Initially no photos
     });
 

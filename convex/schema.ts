@@ -29,7 +29,6 @@ export default defineSchema({
     description: v.optional(v.string()),
     locationId: v.optional(v.string()),
     isCustom: v.boolean(),
-    users: v.array(v.string()),
     photos: v.optional(v.array(v.string())),
   }),
 
@@ -37,8 +36,9 @@ export default defineSchema({
     tripId: v.string(),
     userId: v.string(),
   })
-    .index("by_trip_and_user", ["tripId", "userId"])
-    .index("by_user", ["userId"]),
+    .index("by_trip", ["tripId"])
+    .index("by_user", ["userId"])
+    .index("by_trip_and_user", ["tripId", "userId"]),
 
   locations: defineTable({
     name: v.string(),
