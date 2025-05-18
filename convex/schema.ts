@@ -18,6 +18,7 @@ export default defineSchema({
     description: v.optional(v.string()),
     adminId: v.string(),
     locationId: v.optional(v.string()),
+    isCustom: v.boolean(),
     joinCode: v.string(),
   })
     .index("by_admin", ["adminId"])
@@ -27,6 +28,7 @@ export default defineSchema({
     name: v.string(),
     description: v.optional(v.string()),
     locationId: v.optional(v.string()),
+    isCustom: v.boolean(),
     users: v.array(v.string()),
     photos: v.optional(v.array(v.string())),
   }),
@@ -43,8 +45,13 @@ export default defineSchema({
     longitude: v.number(),
     latitude: v.number(),
     description: v.string(),
-    photos: v.string(), // URLs
+    photo: v.string(), // URLs
   }).index("by_name", ["name"]),
+
+  custom_locations: defineTable({
+    name: v.string(),
+    description: v.optional(v.string()),
+  }),
 
   animals: defineTable({
     name: v.string(),

@@ -1,7 +1,7 @@
 import { api } from "@/convex/_generated/api";
 import { useUser } from "@clerk/clerk-expo";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
-import { useQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { useSegments } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
@@ -13,7 +13,7 @@ import {
 } from "react-native";
 import CreateTrip from "./CreateTrip";
 
-const NoFamily = () => {
+const NoTrip = () => {
   const { user } = useUser();
 
   const clerkId = user?.id;
@@ -25,15 +25,37 @@ const NoFamily = () => {
 
   const [code, setCode] = useState("");
 
+  const [finalCode, setFinalCode] = useState<string | undefined>(undefined);
+
   const [codeAttempt, setCodeAttempt] = useState(false);
 
   const handleCodeJoin = () => {
-    // try to join trip then set code attempt to true
+    setFinalCode(code.toUpperCase());
+    if (trip !== undefined) {
+      setCodeAttempt(true);
+    }
   };
 
   const [creatingTrip, setCreatingTrip] = useState(false);
 
   const segments = useSegments();
+
+  const changeTripId = useMutation(api.users.changeTripId);
+
+  const trip = useQuery(
+    api.trips.getByCode,
+    finalCode ? { joinCode: finalCode } : "skip"
+  );
+
+  useEffect(() => {
+    if (trip) {
+      changeTripId({
+        id: fullUser!._id,
+        tripId: trip!._id,
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [trip]);
 
   useEffect(() => {
     if (codeAttempt) {
@@ -43,7 +65,7 @@ const NoFamily = () => {
   }, [segments]);
 
   if (creatingTrip) {
-    return <CreateTrip />;
+    return <CreateTrip onCancel={() => setCreatingTrip(false)} />;
   } else {
     return (
       <ScrollView
@@ -105,4 +127,4 @@ const NoFamily = () => {
   }
 };
 
-export default NoFamily;
+export default NoTrip;

@@ -1,16 +1,16 @@
 import { Stack } from "expo-router";
 
-export default function ProfileLayout() {
+export default function PastTripsLayout() {
   return (
     <Stack>
       <Stack.Screen
-        name="index"
+        name="pastTrips"
         options={{
           headerShown: false,
         }}
       />
       <Stack.Screen
-        name="(pastTrips)"
+        name="[id]"
         options={{
           headerShown: false,
         }}

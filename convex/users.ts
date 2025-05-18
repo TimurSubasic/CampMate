@@ -1,4 +1,5 @@
 import { v } from "convex/values";
+import { Id } from "./_generated/dataModel";
 import { mutation, query } from "./_generated/server";
 
 export const generateUploadUrl = mutation(async (ctx) => {
@@ -99,28 +100,88 @@ export const changePhoto = mutation({
   },
 });
 
-export const addTrip = mutation({
+export const changeTripId = mutation({
   args: {
     id: v.id("users"),
-    joinCode: v.string(),
+    tripId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    // querry trips table by join code check if it exists
-    // if !trip return
     await ctx.db.patch(args.id, {
-      tripId: "", // add the real trip id from queryed trip
+      tripId: args.tripId,
     });
   },
 });
 
 export const leaveTrip = mutation({
   args: {
-    id: v.id("users"),
+    userId: v.id("users"),
+    tripId: v.id("trips"),
   },
   handler: async (ctx, args) => {
-    await ctx.db.patch(args.id, {
-      tripId: "",
-    });
+    const { userId, tripId } = args;
+
+    // Get the trip
+    const trip = await ctx.db.get(tripId);
+    if (!trip) {
+      return {
+        success: false,
+        message: "Trip not Found",
+      };
+    }
+
+    // Get the user
+    const user = await ctx.db.get(userId);
+    if (!user) {
+      return {
+        success: false,
+        message: "User not Found",
+      };
+    }
+
+    // Check if user is in this trip
+    if (user.tripId !== tripId.toString()) {
+      return {
+        success: false,
+        message: "User not in this Trip",
+      };
+    }
+
+    // Check if user is the admin
+    const isAdmin = trip.adminId === userId.toString();
+
+    if (!isAdmin) {
+      // Regular user leaving - just remove their tripId
+      await ctx.db.patch(userId, { tripId: undefined });
+      return { success: true };
+    } else {
+      // Admin is leaving - need to find a new admin or delete the trip
+
+      // Get all users in this trip
+      const tripUsers = await ctx.db
+        .query("users")
+        .withIndex("by_trip_id", (q) => q.eq("tripId", tripId.toString()))
+        .collect();
+
+      // Filter out the current admin
+      const otherUsers = tripUsers.filter(
+        (u) => u._id.toString() !== userId.toString()
+      );
+
+      if (otherUsers.length === 0) {
+        // No other users - delete the trip
+        await ctx.db.delete(tripId);
+        // Remove tripId from the admin
+        await ctx.db.patch(userId, { tripId: undefined });
+        return { success: true, tripDeleted: true };
+      } else {
+        // Assign the first other user as the new admin
+        const newAdmin = otherUsers[0];
+        await ctx.db.patch(tripId, { adminId: newAdmin._id.toString() });
+        // Remove tripId from the leaving admin
+        await ctx.db.patch(userId, { tripId: undefined });
+        return { success: true, newAdminId: newAdmin._id };
+      }
+    }
   },
 });
 
@@ -128,7 +189,7 @@ export const getImageUrl = query({
   args: { storageId: v.optional(v.id("_storage")) },
   handler: async (ctx, args) => {
     if (!args.storageId) {
-      return "kg2f6gfmq2vvdbehah7bg1eh497g036z"; // Or a default image URL
+      return "kg2f6gfmq2vvdbehah7bg1eh497g036z";
     }
     return await ctx.storage.getUrl(args.storageId);
   },
@@ -146,5 +207,53 @@ export const deletePreviusPhoto = mutation({
       console.error("Error deleting file:", error);
       return { success: false, error: String(error) };
     }
+  },
+});
+
+export const getUsersByTrip = query({
+  args: {
+    tripId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const users = await ctx.db
+      .query("users")
+      .withIndex("by_trip_id", (q) => q.eq("tripId", args.tripId))
+      .collect();
+
+    return users;
+  },
+});
+
+export const getUsersWithPhotosByTripId = query({
+  args: { tripId: v.id("trips") },
+  handler: async (ctx, args) => {
+    const users = await ctx.db
+      .query("users")
+      .withIndex("by_trip_id", (q) => q.eq("tripId", args.tripId))
+      .collect();
+
+    const usersWithPhotos = await Promise.all(
+      users.map(async (user) => {
+        // Cast the storage ID to the proper type
+        const photoId = (user.photo as Id<"_storage">) || null;
+        let photoUrl = null;
+
+        if (photoId) {
+          photoUrl = await ctx.storage.getUrl(photoId);
+        } else {
+          // For default photo, also use proper typing
+          const defaultPhotoId =
+            "kg2f6gfmq2vvdbehah7bg1eh497g036z" as Id<"_storage">;
+          photoUrl = await ctx.storage.getUrl(defaultPhotoId);
+        }
+
+        return {
+          ...user,
+          photoUrl,
+        };
+      })
+    );
+
+    return usersWithPhotos;
   },
 });

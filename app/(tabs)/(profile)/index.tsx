@@ -47,13 +47,10 @@ const Profile = () => {
     }
   };
 
-  const [image, setImage] = useState<string | null>(null);
-
   const generateUploadUrl = useMutation(api.users.generateUploadUrl);
   const changePhoto = useMutation(api.users.changePhoto);
 
   const pickImage = async () => {
-    setImage(null);
     // No permissions request is necessary for launching the image library
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ["images"],
@@ -65,7 +62,6 @@ const Profile = () => {
     //not cancled
     if (!result.canceled) {
       const fileUri = result.assets[0].uri;
-      setImage(fileUri);
 
       try {
         const uploadUrl = await generateUploadUrl();
@@ -186,7 +182,9 @@ const Profile = () => {
 
             <TouchableOpacity
               className="bg-white p-5 rounded-lg shadow flex-row items-center"
-              onPress={() => router.push("/(tabs)/(profile)/pastTrips")}
+              onPress={() =>
+                router.push("/(tabs)/(profile)/(pastTrips)/pastTrips")
+              }
             >
               <FontAwesome
                 name="history"
