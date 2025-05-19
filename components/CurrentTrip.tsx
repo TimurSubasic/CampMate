@@ -5,7 +5,7 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useMutation, useQuery } from "convex/react";
 import { BlurView } from "expo-blur";
-import Checkbox from "expo-checkbox";
+import { Checkbox } from "expo-checkbox";
 import * as Clipboard from "expo-clipboard";
 import React, { useEffect, useState } from "react";
 import {

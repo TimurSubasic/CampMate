@@ -1,4 +1,4 @@
-import ImageWithLoading from "@/components/ImageWithLoading";
+import LargeImageWithLoading from "@/components/LargeImageWithLoading";
 import Loading from "@/components/Loading";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
@@ -191,7 +191,7 @@ export default function Trip() {
                 <View className="flex w-full flex-col items-center justify-center gap-2">
                   {photos?.map((photo, index) => (
                     <View key={index}>
-                      <ImageWithLoading src={photo.url as string} />
+                      <LargeImageWithLoading src={photo.url as string} />
                       <View
                         style={{ width: screenWidth }}
                         className="flex flex-row items-center justify-center"
