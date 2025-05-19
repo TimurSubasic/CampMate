@@ -1,12 +1,13 @@
 import { api } from "@/convex/_generated/api";
+import { Id } from "@/convex/_generated/dataModel";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import Octicons from "@expo/vector-icons/Octicons";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
-import { useMutation } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { BlurView } from "expo-blur";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import {
-  Alert,
   Modal,
   ScrollView,
   Text,
@@ -17,22 +18,85 @@ import {
 
 export default function CreateTrip({ onCancel }: { onCancel: () => void }) {
   const [name, setName] = useState("");
-  const [locationModal, setLocationModal] = useState(false);
-  const [customModal, setCustomModal] = useState(false);
-
   const [description, setDescription] = useState("");
 
   const tabBarHeight = useBottomTabBarHeight();
 
+  // modals
+  const [locationModal, setLocationModal] = useState(false);
+  const [customModal, setCustomModal] = useState(false);
+  const [checklistModal, setChecklistModal] = useState(false);
+
+  // custom location ?
   const [isCustom, setIsCustom] = useState<boolean | undefined>(undefined);
 
+  // custom location props
   const [customName, setCustomName] = useState("");
   const [customDescription, setCustomDescription] = useState("");
+
+  // check if all info is set
+  const [hasName, setHasName] = useState(true);
+  const [hasLocation, setHasLocation] = useState(true);
+  const [hasChecklist, setHasChecklist] = useState(true);
+
+  // search stuff
+  const [searchText, setSearchText] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const searchTimeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  // Get 5 locations
+  const locations = useQuery(api.locations.getFive);
+
+  // Query locations based on search text
+  const searchResults = useQuery(api.locations.searchByName, {
+    searchText: debouncedSearch,
+  });
+
+  // Debounce search input to avoid too many queries
+  const handleSearchChange = (text: string) => {
+    setSearchText(text);
+
+    // Debounce the search query
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+    searchTimeoutRef.current = setTimeout(() => {
+      setDebouncedSearch(text);
+    }, 300);
+  };
+
+  // set pickedLocation
+  const [pickedLocation, setPickedLocation] = useState("");
+
+  const handleLocationPick = (id: string) => {
+    setIsCustom(false);
+
+    setPickedLocation(id);
+
+    setLocationModal(false);
+  };
+
+  const checklists = useQuery(api.preset_checklists.getAllChecklists);
+
+  const [pickedChecklist, setPickedChecklist] = useState<
+    Id<"preset_cheklists"> | undefined
+  >(undefined);
+
   const handleCustomSave = () => {
     if (customName.length >= 2) {
       setCustomModal(false);
 
       setIsCustom(true);
+
+      setHasLocation(true);
+    }
+  };
+
+  const handleNameInput = (text: string) => {
+    setName(text);
+
+    if (text.length >= 2) {
+      setHasName(true);
     }
   };
 
@@ -42,7 +106,11 @@ export default function CreateTrip({ onCancel }: { onCancel: () => void }) {
   );
 
   const handleCreateTrip = async () => {
-    if (name.length >= 2 && isCustom !== undefined) {
+    if (
+      name.length >= 2 &&
+      isCustom !== undefined &&
+      pickedChecklist !== undefined
+    ) {
       console.log("creating...");
       if (isCustom) {
         const customLocation = await createCustomLocation({
@@ -56,11 +124,39 @@ export default function CreateTrip({ onCancel }: { onCancel: () => void }) {
           description: description,
           locationId: customLocation,
           isCustom: isCustom,
+          checklistId: pickedChecklist,
         });
       } else {
         // find location user picked and create trip with that location id
+        createTrip({
+          name: name,
+          description: description,
+          locationId: pickedLocation,
+          isCustom: isCustom,
+          checklistId: pickedChecklist,
+        });
       }
     }
+    // if trip details not set
+    else {
+      if (name.length < 2) {
+        setHasName(false);
+      }
+
+      if (isCustom === undefined) {
+        setHasLocation(false);
+      }
+
+      if (pickedChecklist === undefined) {
+        setHasChecklist(false);
+      }
+    }
+  };
+
+  const handleChecklistSave = (id: Id<"preset_cheklists">) => {
+    setPickedChecklist(id);
+    setHasChecklist(true);
+    setChecklistModal(false);
   };
 
   return (
@@ -81,19 +177,28 @@ export default function CreateTrip({ onCancel }: { onCancel: () => void }) {
         {/* main content */}
         <View className="flex-1 items-center justify-between">
           <View className="flex flex-col w-full items-start justify-center gap-5 my-10">
-            <Text className="text-xl font-semibold">Choose your trip name</Text>
+            {/* Name */}
+            <View className="flex flex-row w-full items-start justify-between">
+              <Text className="text-xl font-semibold">Trip Name</Text>
+
+              {hasName ? (
+                <View />
+              ) : (
+                <Text className="font-semibold text-red-600">Enter a name</Text>
+              )}
+            </View>
+
             <TextInput
               className="p-5 border border-slate-600 rounded-lg w-full "
               placeholder="Name"
               placeholderTextColor={"#475569"}
-              onChangeText={(text) => setName(text)}
+              onChangeText={(text) => handleNameInput(text)}
               defaultValue={name}
             />
 
-            <View className="flex flex-row w-full items-center justify-between mt-5">
-              <Text className="text-xl font-semibold">
-                Write your description
-              </Text>
+            {/* Description */}
+            <View className="flex flex-row w-full items-start justify-between mt-5">
+              <Text className="text-xl font-semibold">Trip Description</Text>
               <Text className="text-sm font-light">Optional</Text>
             </View>
 
@@ -107,7 +212,18 @@ export default function CreateTrip({ onCancel }: { onCancel: () => void }) {
               defaultValue={description}
             />
 
-            <Text className="text-xl font-semibold mt-5">Location</Text>
+            {/* Location */}
+            <View className="flex flex-row w-full items-start justify-between mt-5">
+              <Text className="text-xl font-semibold">Location</Text>
+              {hasLocation ? (
+                <View />
+              ) : (
+                <Text className="font-semibold text-red-600">
+                  Pick a location
+                </Text>
+              )}
+            </View>
+
             <View className="flex flex-row items-center justify-center gap-5">
               <TouchableOpacity
                 onPress={() => setLocationModal(true)}
@@ -125,6 +241,27 @@ export default function CreateTrip({ onCancel }: { onCancel: () => void }) {
                 <FontAwesome name="edit" size={24} />
               </TouchableOpacity>
             </View>
+
+            {/* Checklist */}
+            {/* Description */}
+            <View className="flex flex-row w-full items-start justify-between mt-5">
+              <Text className="text-xl font-semibold">Cheklist</Text>
+              {hasChecklist ? (
+                <View />
+              ) : (
+                <Text className="font-semibold text-red-600">
+                  Pick a Checklist
+                </Text>
+              )}
+            </View>
+
+            <TouchableOpacity
+              onPress={() => setChecklistModal(true)}
+              className="w-full flex flex-row items-center justify-between p-5 bg-white rounded-lg shadow"
+            >
+              <Text>Pick...</Text>
+              <Octicons name="checklist" size={24} />
+            </TouchableOpacity>
           </View>
 
           <TouchableOpacity
@@ -146,7 +283,6 @@ export default function CreateTrip({ onCancel }: { onCancel: () => void }) {
         transparent={true}
         visible={locationModal}
         onRequestClose={() => {
-          Alert.alert("Modal has been closed.");
           setLocationModal(false);
         }}
       >
@@ -179,7 +315,71 @@ export default function CreateTrip({ onCancel }: { onCancel: () => void }) {
                 flexGrow: 1,
               }}
               keyboardShouldPersistTaps="handled"
-            ></ScrollView>
+            >
+              <View className="flex-1 items-center justify-between">
+                <View className="flex flex-col w-full items-start justify-center gap-5 my-10">
+                  <View className="flex flex-row items-center justify-center h-16 border border-slate-600 rounded-lg w-full">
+                    <TextInput
+                      className="p-5 flex-1 "
+                      placeholder="Search"
+                      placeholderTextColor={"#475569"}
+                      onChangeText={(text) => handleSearchChange(text)}
+                      defaultValue={searchText}
+                    />
+
+                    <FontAwesome
+                      size={30}
+                      name="search"
+                      className="pr-5"
+                      color={"#475569"}
+                    />
+                  </View>
+
+                  {/* map locations */}
+
+                  {debouncedSearch.length === 0 ? (
+                    /* map locations */
+                    locations?.map((location, index) => (
+                      <View
+                        key={index}
+                        className="flex w-full items-center justify-center"
+                      >
+                        <TouchableOpacity
+                          onPress={() => handleLocationPick(location._id)}
+                          className="border border-slate-600 w-full p-5 rounded-lg "
+                        >
+                          <Text className="font-semibold text-lg">
+                            {location.name}
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+                    ))
+                  ) : /* map search result */
+
+                  searchResults?.length === 0 ? (
+                    <View className="w-full items-center justify-center flex my-20">
+                      <Text>No locations found</Text>
+                    </View>
+                  ) : (
+                    searchResults?.map((location, index) => (
+                      <View
+                        key={index}
+                        className="flex w-full items-center justify-center"
+                      >
+                        <TouchableOpacity
+                          onPress={() => handleLocationPick(location._id)}
+                          className="border border-slate-600 w-full p-5 rounded-lg "
+                        >
+                          <Text className="font-semibold text-lg">
+                            {location.name}
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+                    ))
+                  )}
+                </View>
+              </View>
+            </ScrollView>
           </View>
         </View>
       </Modal>
@@ -190,7 +390,6 @@ export default function CreateTrip({ onCancel }: { onCancel: () => void }) {
         transparent={true}
         visible={customModal}
         onRequestClose={() => {
-          Alert.alert("Modal has been closed.");
           setCustomModal(false);
         }}
       >
@@ -259,6 +458,66 @@ export default function CreateTrip({ onCancel }: { onCancel: () => void }) {
                     Save
                   </Text>
                 </TouchableOpacity>
+              </View>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Checklists modal */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={checklistModal}
+        onRequestClose={() => {
+          setChecklistModal(false);
+        }}
+      >
+        <BlurView
+          intensity={100}
+          tint="dark"
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+          }}
+        />
+        <View
+          className="flex-1 flex items-center justify-center"
+          style={{ marginBottom: tabBarHeight / 2 }}
+        >
+          <View className="w-[80%] h-[70%] -mt-[10%] bg-white rounded-xl p-5 ">
+            <View className="flex flex-row items-center justify-between">
+              <Text className="font-semibold text-lg">Choose Checklist</Text>
+              <TouchableOpacity onPress={() => setChecklistModal(false)}>
+                <MaterialIcons name="cancel" size={30} color="gray" />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={{
+                flexGrow: 1,
+              }}
+              keyboardShouldPersistTaps="handled"
+            >
+              <View className="flex flex-col w-full items-start justify-center gap-5 my-10">
+                {/* map the checklist */}
+                {checklists?.map((checklist, index) => (
+                  <View key={index}>
+                    <TouchableOpacity
+                      onPress={() => handleChecklistSave(checklist._id)}
+                      className="w-full flex flex-row items-center justify-between p-5 bg-gray-200 border border-black rounded-lg"
+                    >
+                      <Text className="text-lg font-medium">
+                        {checklist.name}
+                      </Text>
+                      <Octicons name="checklist" size={24} />
+                    </TouchableOpacity>
+                  </View>
+                ))}
               </View>
             </ScrollView>
           </View>

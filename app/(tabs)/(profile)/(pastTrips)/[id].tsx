@@ -132,7 +132,7 @@ export default function Trip() {
               </Text>
               {trip?.location?.description ? (
                 <Text className="text-lg font-light mt-5">
-                  Description: {trip?.description}
+                  Description: {trip?.location.description}
                 </Text>
               ) : (
                 <></>

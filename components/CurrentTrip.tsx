@@ -5,8 +5,9 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useMutation, useQuery } from "convex/react";
 import { BlurView } from "expo-blur";
+import Checkbox from "expo-checkbox";
 import * as Clipboard from "expo-clipboard";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Image,
   Modal,
@@ -40,6 +41,38 @@ export default function CurrentTrip() {
     trip ? { tripId: trip._id } : "skip"
   );
 
+  const checklist = useQuery(
+    api.checklists.getByTrip,
+    trip ? { tripId: trip._id } : "skip"
+  );
+
+  const [localChecklist, setLocalChecklist] = useState(checklist);
+  const updateChecklistMutation = useMutation(
+    api.checklists.updateChecklistItems
+  );
+
+  useEffect(() => {
+    setLocalChecklist(checklist);
+  }, [checklist]);
+
+  // Function to handle checkbox changes
+  const handleCheckboxChange = (index: number, newValue: boolean) => {
+    if (!localChecklist) return;
+    const updatedChecklist = [...localChecklist];
+    updatedChecklist[index] = {
+      ...updatedChecklist[index],
+      completed: newValue,
+    };
+    setLocalChecklist(updatedChecklist);
+
+    // Update the database with the new checklist items
+    if (trip) {
+      updateChecklistMutation({
+        tripId: trip._id,
+        items: updatedChecklist,
+      });
+    }
+  };
   // add members
   const handleAdd = async () => {
     await Clipboard.setStringAsync(trip?.joinCode as string);
@@ -60,7 +93,7 @@ export default function CurrentTrip() {
   };
 
   // leave trip
-  const leaveTrip = useMutation(api.users.leaveTrip);
+  const leaveTrip = useMutation(api.trips.leaveTrip);
   const handleLeave = () => {
     leaveTrip({
       userId: fullUser?._id as Id<"users">,
@@ -121,7 +154,7 @@ export default function CurrentTrip() {
             </Text>
             {trip?.location?.description ? (
               <Text className="text-lg font-light mt-5">
-                Description: {trip?.description}
+                Description: {trip?.location.description}
               </Text>
             ) : (
               <></>
@@ -160,19 +193,54 @@ export default function CurrentTrip() {
                 </View>
               ))}
             </View>
+
+            <TouchableOpacity
+              onPress={handleAdd}
+              className="w-full rounded-lg bg-[#0D7377] p-5 my-10"
+            >
+              <Text className="text-white font-bold text-xl text-center">
+                Add Members
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          <View className="w-full flex flex-col gap-5">
+            <Text className="text-center font-semibold text-2xl">
+              Checklist
+            </Text>
+
+            <View className="w-full flex flex-col items-center justify-center gap-5">
+              {localChecklist?.map((item, index) => (
+                <View
+                  key={index}
+                  className="w-full flex flex-row justify-between items-center border-b border-slate-600 py-5"
+                >
+                  <Text className="text-lg font-semibold">{item.name}</Text>
+                  <Checkbox
+                    value={item.completed}
+                    color={"#0D7377"}
+                    className="p-3"
+                    onValueChange={(newValue) =>
+                      handleCheckboxChange(index, newValue)
+                    }
+                  />
+                </View>
+              ))}
+            </View>
+
+            <TouchableOpacity
+              // onPress={handleEdit}
+              className="w-full rounded-lg bg-[#0D7377] p-5 my-10"
+            >
+              <Text className="text-white font-bold text-xl text-center">
+                Edit Checklist
+              </Text>
+            </TouchableOpacity>
           </View>
         </View>
 
         {/* Buttons */}
         <View className="w-full flex flex-col items-center justify-center gap-5 mt-10">
-          <TouchableOpacity
-            onPress={handleAdd}
-            className="w-full rounded-lg bg-[#0D7377] p-5"
-          >
-            <Text className="text-white font-bold text-xl text-center">
-              Add Members
-            </Text>
-          </TouchableOpacity>
           <View className="h-3 w-full rounded-lg bg-red-600 mt-5" />
           <TouchableOpacity
             onPress={handleLeave}

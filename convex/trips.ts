@@ -17,6 +17,7 @@ export const createTrip = mutation({
     description: v.optional(v.string()),
     locationId: v.optional(v.string()),
     isCustom: v.boolean(),
+    checklistId: v.id("preset_cheklists"),
   },
   handler: async (ctx, args) => {
     let joinCode;
@@ -63,6 +64,15 @@ export const createTrip = mutation({
       };
     }
 
+    const presetChecklist = await ctx.db.get(args.checklistId);
+
+    if (!presetChecklist) {
+      return {
+        success: false,
+        message: "No preset checklist found",
+      };
+    }
+
     //generate trip
     const tripId = await ctx.db.insert("trips", {
       name: args.name,
@@ -75,6 +85,14 @@ export const createTrip = mutation({
 
     await ctx.db.patch(user._id, {
       tripId: tripId,
+    });
+
+    await ctx.db.insert("checklists", {
+      tripId: tripId,
+      items: presetChecklist.items.map((item) => ({
+        name: item.name,
+        completed: false, // Set all items to uncompleted by default
+      })),
     });
   },
 });
@@ -139,6 +157,97 @@ export const getTripWithLocation = query({
   },
 });
 
+export const leaveTrip = mutation({
+  args: {
+    userId: v.id("users"),
+    tripId: v.id("trips"),
+  },
+  handler: async (ctx, args) => {
+    const { userId, tripId } = args;
+
+    // Get the trip
+    const trip = await ctx.db.get(tripId);
+    if (!trip) {
+      return {
+        success: false,
+        message: "Trip not Found",
+      };
+    }
+
+    // Get the user
+    const user = await ctx.db.get(userId);
+    if (!user) {
+      return {
+        success: false,
+        message: "User not Found",
+      };
+    }
+
+    // Check if user is in this trip
+    if (user.tripId !== tripId.toString()) {
+      return {
+        success: false,
+        message: "User not in this Trip",
+      };
+    }
+
+    // Check if user is the admin
+    const isAdmin = trip.adminId === userId.toString();
+
+    if (!isAdmin) {
+      // Regular user leaving - just remove their tripId
+      await ctx.db.patch(userId, { tripId: undefined });
+      return { success: true };
+    } else {
+      // Admin is leaving - need to find a new admin or delete the trip
+
+      // Get all users in this trip
+      const tripUsers = await ctx.db
+        .query("users")
+        .withIndex("by_trip_id", (q) => q.eq("tripId", tripId.toString()))
+        .collect();
+
+      // Filter out the current admin
+      const otherUsers = tripUsers.filter(
+        (u) => u._id.toString() !== userId.toString()
+      );
+
+      if (otherUsers.length === 0) {
+        // No other users - delete the trip
+        await ctx.db.delete(tripId);
+        // Remove tripId from the admin
+        await ctx.db.patch(userId, { tripId: undefined });
+        //Check if location is custom and delete it
+        if (trip.isCustom) {
+          await ctx.db.delete(trip.locationId as Id<"custom_locations">);
+        }
+        // Get checklist and delete it
+        const checklist = await ctx.db
+          .query("checklists")
+          .withIndex("by_trip", (q) => q.eq("tripId", tripId))
+          .first();
+
+        if (!checklist) {
+          return {
+            success: false,
+            message: "Checklist not found",
+          };
+        }
+        await ctx.db.delete(checklist._id);
+
+        return { success: true, tripDeleted: true };
+      } else {
+        // Assign the first other user as the new admin
+        const newAdmin = otherUsers[0];
+        await ctx.db.patch(tripId, { adminId: newAdmin._id.toString() });
+        // Remove tripId from the leaving admin
+        await ctx.db.patch(userId, { tripId: undefined });
+        return { success: true, newAdminId: newAdmin._id };
+      }
+    }
+  },
+});
+
 export const completeTrip = mutation({
   args: {
     tripId: v.id("trips"),
@@ -161,6 +270,19 @@ export const completeTrip = mutation({
       .withIndex("by_trip_id", (q) => q.eq("tripId", tripId.toString()))
       .collect();
 
+    // Get the checklist
+    const checklist = await ctx.db
+      .query("checklists")
+      .withIndex("by_trip", (q) => q.eq("tripId", tripId))
+      .first();
+
+    if (!checklist) {
+      return {
+        success: false,
+        message: "Checklist not found",
+      };
+    }
+
     // Create a new past trip
     const pastTripId = await ctx.db.insert("past_trips", {
       name: trip.name,
@@ -180,6 +302,9 @@ export const completeTrip = mutation({
       // Update user to remove tripId
       await ctx.db.patch(user._id, { tripId: undefined });
     }
+
+    // Delete the checklist
+    await ctx.db.delete(checklist._id);
 
     // Delete the original trip
     await ctx.db.delete(tripId);

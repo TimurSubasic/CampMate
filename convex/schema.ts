@@ -45,8 +45,12 @@ export default defineSchema({
     longitude: v.number(),
     latitude: v.number(),
     description: v.string(),
-    photo: v.string(), // URLs
-  }).index("by_name", ["name"]),
+    photo: v.string(), // URL
+  })
+    .index("by_name", ["name"])
+    .searchIndex("search_name", {
+      searchField: "name",
+    }),
 
   custom_locations: defineTable({
     name: v.string(),
@@ -94,8 +98,15 @@ export default defineSchema({
         completed: v.boolean(),
       })
     ),
-    preset: v.boolean(),
-  })
-    .index("by_trip", ["tripId"])
-    .index("by_preset", ["preset"]),
+  }).index("by_trip", ["tripId"]),
+
+  preset_cheklists: defineTable({
+    name: v.string(),
+    items: v.array(
+      v.object({
+        name: v.string(),
+        completed: v.boolean(),
+      })
+    ),
+  }),
 });
