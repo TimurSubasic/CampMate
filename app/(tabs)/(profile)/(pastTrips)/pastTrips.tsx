@@ -52,7 +52,7 @@ export default function PastTrips() {
           {pastTrips.length === 0 ? (
             <View>
               <Text className="font-bold text-3xl text-center">
-                You have 0 Past Trips! HYCVSO
+                You have 0 Past Trips!
               </Text>
             </View>
           ) : (

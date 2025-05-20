@@ -71,12 +71,12 @@ export default defineSchema({
 
   location_animals: defineTable({
     locationId: v.string(),
-    animalId: v.string(),
+    animalId: v.array(v.string()),
   }).index("by_location", ["locationId"]),
 
   location_plants: defineTable({
     locationId: v.string(),
-    plantId: v.string(),
+    plantId: v.array(v.string()),
   }).index("by_location", ["locationId"]),
 
   tutorials: defineTable({

@@ -8,6 +8,7 @@ import { useMutation, useQuery } from "convex/react";
 import { BlurView } from "expo-blur";
 import React, { useRef, useState } from "react";
 import {
+  FlatList,
   Modal,
   ScrollView,
   Text,
@@ -45,7 +46,7 @@ export default function CreateTrip({ onCancel }: { onCancel: () => void }) {
   const searchTimeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   // Get 5 locations
-  const locations = useQuery(api.locations.getFive);
+  const locations = useQuery(api.locations.getAll);
 
   // Query locations based on search text
   const searchResults = useQuery(api.locations.searchByName, {
@@ -74,6 +75,8 @@ export default function CreateTrip({ onCancel }: { onCancel: () => void }) {
     setPickedLocation(id);
 
     setLocationModal(false);
+
+    setHasLocation(true);
   };
 
   const checklists = useQuery(api.preset_checklists.getAllChecklists);
@@ -309,77 +312,75 @@ export default function CreateTrip({ onCancel }: { onCancel: () => void }) {
               </TouchableOpacity>
             </View>
 
-            <ScrollView
-              showsVerticalScrollIndicator={false}
-              contentContainerStyle={{
-                flexGrow: 1,
-              }}
-              keyboardShouldPersistTaps="handled"
-            >
-              <View className="flex-1 items-center justify-between">
-                <View className="flex flex-col w-full items-start justify-center gap-5 my-10">
-                  <View className="flex flex-row items-center justify-center h-16 border border-slate-600 rounded-lg w-full">
-                    <TextInput
-                      className="p-5 flex-1 "
-                      placeholder="Search"
-                      placeholderTextColor={"#475569"}
-                      onChangeText={(text) => handleSearchChange(text)}
-                      defaultValue={searchText}
-                    />
+            <View className="flex-1 items-center justify-between">
+              <View className="flex flex-col w-full items-start justify-center gap-5 mt-5 mb-10">
+                <View className="flex flex-row items-center justify-center h-16 border bg-gray-200/50 border-slate-600 rounded-3xl w-full">
+                  <TextInput
+                    className="p-5 flex-1 "
+                    placeholder="Search"
+                    placeholderTextColor={"#475569"}
+                    onChangeText={(text) => handleSearchChange(text)}
+                    defaultValue={searchText}
+                  />
 
-                    <FontAwesome
-                      size={30}
-                      name="search"
-                      className="pr-5"
-                      color={"#475569"}
-                    />
-                  </View>
-
-                  {/* map locations */}
-
-                  {debouncedSearch.length === 0 ? (
-                    /* map locations */
-                    locations?.map((location, index) => (
-                      <View
-                        key={index}
-                        className="flex w-full items-center justify-center"
-                      >
-                        <TouchableOpacity
-                          onPress={() => handleLocationPick(location._id)}
-                          className="border border-slate-600 w-full p-5 rounded-lg "
-                        >
-                          <Text className="font-semibold text-lg">
-                            {location.name}
-                          </Text>
-                        </TouchableOpacity>
-                      </View>
-                    ))
-                  ) : /* map search result */
-
-                  searchResults?.length === 0 ? (
-                    <View className="w-full items-center justify-center flex my-20">
-                      <Text>No locations found</Text>
-                    </View>
-                  ) : (
-                    searchResults?.map((location, index) => (
-                      <View
-                        key={index}
-                        className="flex w-full items-center justify-center"
-                      >
-                        <TouchableOpacity
-                          onPress={() => handleLocationPick(location._id)}
-                          className="border border-slate-600 w-full p-5 rounded-lg "
-                        >
-                          <Text className="font-semibold text-lg">
-                            {location.name}
-                          </Text>
-                        </TouchableOpacity>
-                      </View>
-                    ))
-                  )}
+                  <FontAwesome
+                    size={30}
+                    name="search"
+                    className="pr-5"
+                    color={"#475569"}
+                  />
                 </View>
+
+                {/* map locations */}
+
+                {debouncedSearch.length === 0 ? (
+                  /* map locations */
+                  <FlatList
+                    className="w-full h-full pt-5"
+                    showsVerticalScrollIndicator={false}
+                    data={locations}
+                    keyExtractor={(item) => item._id.toString()}
+                    renderItem={({ item }) => (
+                      <View className=" w-full mb-5">
+                        <TouchableOpacity
+                          onPress={() => handleLocationPick(item._id)}
+                          className="border bg-gray-200/80 border-slate-600 w-full p-5 rounded-lg "
+                        >
+                          <Text className="font-semibold text-lg">
+                            {item.name}
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+                    )}
+                  />
+                ) : /* map search result */
+
+                searchResults?.length === 0 ? (
+                  <View className="w-full items-center justify-center flex my-20">
+                    <Text>No locations found</Text>
+                  </View>
+                ) : (
+                  <FlatList
+                    className="w-full h-full pt-5"
+                    showsVerticalScrollIndicator={false}
+                    data={searchResults}
+                    keyExtractor={(item) => item._id.toString()}
+                    renderItem={({ item }) => (
+                      <View className=" w-full mb-5">
+                        <TouchableOpacity
+                          onPress={() => handleLocationPick(item._id)}
+                          className="border bg-gray-200/80 border-slate-600 w-full p-5 rounded-lg "
+                        >
+                          <Text className="font-semibold text-lg">
+                            {item.name}
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+                    )}
+                  />
+                )}
               </View>
-            </ScrollView>
+            </View>
           </View>
         </View>
       </Modal>
@@ -496,30 +497,23 @@ export default function CreateTrip({ onCancel }: { onCancel: () => void }) {
               </TouchableOpacity>
             </View>
 
-            <ScrollView
-              showsVerticalScrollIndicator={false}
-              contentContainerStyle={{
-                flexGrow: 1,
-              }}
-              keyboardShouldPersistTaps="handled"
-            >
-              <View className="flex flex-col w-full items-start justify-center gap-5 my-10">
-                {/* map the checklist */}
-                {checklists?.map((checklist, index) => (
-                  <View key={index}>
-                    <TouchableOpacity
-                      onPress={() => handleChecklistSave(checklist._id)}
-                      className="w-full flex flex-row items-center justify-between p-5 bg-gray-200 border border-black rounded-lg"
-                    >
-                      <Text className="text-lg font-medium">
-                        {checklist.name}
-                      </Text>
-                      <Octicons name="checklist" size={24} />
-                    </TouchableOpacity>
-                  </View>
-                ))}
-              </View>
-            </ScrollView>
+            <View className="flex flex-col w-full items-start justify-center gap-5 my-10">
+              {/* map the checklist */}
+              <FlatList
+                className="w-full pt-5 h-full"
+                data={checklists}
+                keyExtractor={(item) => item._id.toString()}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    onPress={() => handleChecklistSave(item._id)}
+                    className="w-full flex flex-row items-center justify-between border bg-gray-200/80 border-slate-600 p-5 rounded-lg mb-5"
+                  >
+                    <Text className="text-lg font-medium">{item.name}</Text>
+                    <Octicons name="checklist" size={24} />
+                  </TouchableOpacity>
+                )}
+              />
+            </View>
           </View>
         </View>
       </Modal>

@@ -1,11 +1,12 @@
 import Loading from "@/components/Loading";
-import MidImageWithLoading from "@/components/MidImageWithLoading";
+import MidImageWithLoading from "@/components/MidImage";
 import { api } from "@/convex/_generated/api";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useQuery } from "convex/react";
 import React, { useRef, useState } from "react";
 import {
-  ScrollView,
+  Dimensions,
+  FlatList,
   Text,
   TextInput,
   TouchableOpacity,
@@ -13,13 +14,16 @@ import {
 } from "react-native";
 
 export default function Index() {
+  // width for cards
+  const screenWidth = (Dimensions.get("window").width - 60) / 2;
+
   // search stuff
   const [searchText, setSearchText] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const searchTimeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   // Get 5 locations
-  const locations = useQuery(api.locations.getFiveWithPhoto);
+  const locations = useQuery(api.locations.getWithPhoto);
 
   // Query locations based on search text
   const searchResults = useQuery(api.locations.searchByNameWithPhoto, {
@@ -43,70 +47,82 @@ export default function Index() {
     return <Loading />;
   }
   return (
-    <ScrollView
-      showsVerticalScrollIndicator={false}
-      contentContainerStyle={{ flexGrow: 1 }}
-      keyboardShouldPersistTaps="handled"
-    >
-      <View className="p-5">
-        {/* Search box */}
-        <View className="flex flex-row items-center justify-center h-16 border border-slate-600 rounded-3xl w-full">
-          <TextInput
-            className="p-5 flex-1 "
-            placeholder="Search"
-            placeholderTextColor={"#475569"}
-            onChangeText={(text) => handleSearchChange(text)}
-            defaultValue={searchText}
-          />
+    <View className="p-5 mb-12">
+      {/* Search box */}
+      <View className="flex flex-row items-center justify-center h-16 border bg-gray-200/80 border-slate-600 rounded-3xl w-full mb-2">
+        <TextInput
+          className="p-5 flex-1 "
+          placeholder="Search"
+          placeholderTextColor={"#475569"}
+          onChangeText={(text) => handleSearchChange(text)}
+          defaultValue={searchText}
+        />
 
-          <FontAwesome
-            size={30}
-            name="search"
-            className="pr-5"
-            color={"#475569"}
-          />
-        </View>
-
-        {/* locations */}
-
-        <View className="w-full flex flex-col items-center justify-center gap-10 my-10">
-          {debouncedSearch.length === 0 ? (
-            locations?.map((location, index) => (
-              <View key={index} className="w-full">
-                <TouchableOpacity className="w-full h-52 flex flex-row items-start justify-start rounded-lg border border-slate-600">
-                  <MidImageWithLoading src={location.imageUrl as string} />
-
-                  <View className="p-5 flex-1">
-                    <Text className="text-lg font-semibold">
-                      {location.name}
-                    </Text>
-                    <Text>{location.description}</Text>
-                  </View>
-                </TouchableOpacity>
-              </View>
-            ))
-          ) : searchResults?.length === 0 ? (
-            <View className="w-full items-center justify-center flex my-20">
-              <Text>No locations found</Text>
-            </View>
-          ) : (
-            searchResults?.map((location, index) => (
-              <View key={index} className="w-full">
-                <TouchableOpacity className="w-full h-52 flex flex-row items-start justify-start rounded-lg border border-slate-600">
-                  <MidImageWithLoading src={location.imageUrl as string} />
-
-                  <View className="p-5 flex-1">
-                    <Text className="text-lg font-semibold">
-                      {location.name}
-                    </Text>
-                    <Text>{location.description}</Text>
-                  </View>
-                </TouchableOpacity>
-              </View>
-            ))
-          )}
-        </View>
+        <FontAwesome
+          size={30}
+          name="search"
+          className="pr-5"
+          color={"#475569"}
+        />
       </View>
-    </ScrollView>
+
+      {/* locations */}
+
+      {debouncedSearch.length === 0 ? (
+        <FlatList
+          showsVerticalScrollIndicator={false}
+          data={locations}
+          key={"grid"}
+          keyExtractor={(location) => location._id.toString()}
+          className="w-full"
+          numColumns={2}
+          contentContainerStyle={{ padding: 0, columnGap: 10 }}
+          renderItem={({ item }) => (
+            <View
+              style={{
+                width: screenWidth,
+              }}
+              className="mr-5 my-5 bg-gray-200/80 rounded-lg border border-slate-600"
+            >
+              <TouchableOpacity className="flex-1 flex items-center justify-start gap-5">
+                <MidImageWithLoading src={item.imageUrl as string} />
+
+                <View className="p-5 w-52">
+                  <Text className="text-lg font-semibold">{item.name}</Text>
+                  <Text>{item.description}</Text>
+                </View>
+              </TouchableOpacity>
+            </View>
+          )}
+        />
+      ) : searchResults?.length === 0 ? (
+        <View className="w-full items-center justify-center flex my-20">
+          <Text>No locations found</Text>
+        </View>
+      ) : (
+        <FlatList
+          showsVerticalScrollIndicator={false}
+          data={searchResults}
+          key={"search"}
+          keyExtractor={(location) => location._id.toString()}
+          className="w-full"
+          renderItem={({ item }) => (
+            <View
+              className="w-full my-5 bg-gray-200/80 rounded-lg border border-slate-600"
+              style={{ height: screenWidth }}
+            >
+              <TouchableOpacity className="w-full flex flex-row items-start justify-start">
+                <MidImageWithLoading src={item.imageUrl as string} />
+
+                <View className="p-5 flex-1">
+                  <Text className="text-lg font-semibold">{item.name}</Text>
+                  <Text>{item.description}</Text>
+                </View>
+              </TouchableOpacity>
+            </View>
+          )}
+        />
+      )}
+    </View>
   );
 }

@@ -1,7 +1,8 @@
-import LargeImageWithLoading from "@/components/LargeImageWithLoading";
+import LargeImageWithLoading from "@/components/LargeImage";
 import Loading from "@/components/Loading";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
+import { useUser } from "@clerk/clerk-expo";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useMutation, useQuery } from "convex/react";
 import * as FileSystem from "expo-file-system";
@@ -10,6 +11,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import React from "react";
 import {
   Dimensions,
+  FlatList,
   Image,
   ScrollView,
   Text,
@@ -19,6 +21,15 @@ import {
 
 export default function Trip() {
   const { id } = useLocalSearchParams();
+
+  const { user } = useUser();
+
+  const clerkId = user?.id;
+
+  const fullUser = useQuery(
+    api.users.getUserByClerk,
+    clerkId ? { clerkId: clerkId } : "skip"
+  );
 
   const router = useRouter();
 
@@ -86,6 +97,15 @@ export default function Trip() {
     }
   };
 
+  const leaveTrip = useMutation(api.past_trips.leaveTrip);
+  const handleDelete = () => {
+    leaveTrip({
+      userId: fullUser!._id,
+      tripId: id as Id<"past_trips">,
+    });
+    router.back();
+  };
+
   if (users === undefined) {
     return <Loading />;
   }
@@ -109,7 +129,7 @@ export default function Trip() {
         contentContainerStyle={{ flexGrow: 1 }}
         keyboardShouldPersistTaps="handled"
       >
-        <View className="p-5">
+        <View className="p-5 flex-1 items-center justify-between">
           <View className="flex flex-col items-center justify-center gap-10 w-full">
             {/* Trip info */}
             <View className="w-full flex flex-col gap-5">
@@ -189,41 +209,50 @@ export default function Trip() {
 
                 {/* photos */}
                 <View className="flex w-full flex-col items-center justify-center gap-2">
-                  {photos?.map((photo, index) => (
-                    <View key={index}>
-                      <LargeImageWithLoading src={photo.url as string} />
-                      <View
-                        style={{ width: screenWidth }}
-                        className="flex flex-row items-center justify-center"
-                      >
-                        <TouchableOpacity className="bg-[#0D7377] flex-1 rounded-bl-lg flex-row items-center justify-between p-3">
-                          <Text className="font-bold text-white text-lg">
-                            Save
-                          </Text>
-                          <FontAwesome
-                            name="download"
-                            size={30}
-                            color={"white"}
-                          />
-                        </TouchableOpacity>
-
-                        <TouchableOpacity
-                          onPress={() =>
-                            deletePhoto({
-                              storageId: photo.storageId as Id<"_storage">,
-                              pastTripId: pastTripId,
-                            })
-                          }
-                          className="bg-red-600 flex-1 rounded-br-lg flex-row items-center justify-between p-3"
+                  <FlatList
+                    scrollEnabled={false} // already in ScrollView
+                    data={photos}
+                    keyExtractor={(item) => item.storageId.toString()}
+                    renderItem={({ item }) => (
+                      <View className="my-2">
+                        <LargeImageWithLoading src={item.url as string} />
+                        <View
+                          style={{ width: screenWidth }}
+                          className="flex flex-row items-center justify-center"
                         >
-                          <Text className="font-bold text-white text-lg">
-                            Delete
-                          </Text>
-                          <FontAwesome name="trash" size={30} color={"white"} />
-                        </TouchableOpacity>
+                          <TouchableOpacity className="bg-[#0D7377] flex-1 rounded-bl-lg flex-row items-center justify-between p-3">
+                            <Text className="font-bold text-white text-lg">
+                              Save
+                            </Text>
+                            <FontAwesome
+                              name="download"
+                              size={30}
+                              color={"white"}
+                            />
+                          </TouchableOpacity>
+
+                          <TouchableOpacity
+                            onPress={() =>
+                              deletePhoto({
+                                storageId: item.storageId as Id<"_storage">,
+                                pastTripId: pastTripId,
+                              })
+                            }
+                            className="bg-red-600 flex-1 rounded-br-lg flex-row items-center justify-between p-3"
+                          >
+                            <Text className="font-bold text-white text-lg">
+                              Delete
+                            </Text>
+                            <FontAwesome
+                              name="trash"
+                              size={30}
+                              color={"white"}
+                            />
+                          </TouchableOpacity>
+                        </View>
                       </View>
-                    </View>
-                  ))}
+                    )}
+                  />
                 </View>
               </View>
             )}
@@ -233,6 +262,18 @@ export default function Trip() {
             >
               <Text className="text-white font-bold text-xl text-center">
                 Add Photo
+              </Text>
+            </TouchableOpacity>
+          </View>
+          {/* Delete trip */}
+          <View className="w-full">
+            <View className="h-3 w-full rounded-lg bg-red-600 my-5" />
+            <TouchableOpacity
+              onPress={handleDelete}
+              className="w-full rounded-lg bg-red-600 p-5"
+            >
+              <Text className="text-white font-bold text-xl text-center">
+                Delete Trip
               </Text>
             </TouchableOpacity>
           </View>

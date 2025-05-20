@@ -11,12 +11,17 @@ interface Props {
   src: string;
 }
 
-export default function LargeImageWithLoading({ src }: Props) {
-  const screenWidth = Dimensions.get("window").width - 40;
+export default function MidImage({ src }: Props) {
+  const screenWidth = (Dimensions.get("window").width - 60) / 2;
   const [isLoading, setIsLoading] = useState(true);
 
   return (
-    <View style={{ width: screenWidth, height: screenWidth }}>
+    <View
+      style={{
+        width: screenWidth,
+        height: screenWidth,
+      }}
+    >
       {isLoading && (
         <View
           style={[
@@ -29,7 +34,11 @@ export default function LargeImageWithLoading({ src }: Props) {
       )}
       <Image
         source={{ uri: src }}
-        style={{ width: screenWidth, height: screenWidth }}
+        style={{
+          width: screenWidth,
+          height: screenWidth,
+        }}
+        className="rounded-lg"
         onLoad={() => setIsLoading(false)}
       />
     </View>

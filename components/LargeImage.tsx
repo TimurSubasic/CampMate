@@ -1,15 +1,22 @@
 import React, { useState } from "react";
-import { ActivityIndicator, Image, StyleSheet, View } from "react-native";
+import {
+  ActivityIndicator,
+  Dimensions,
+  Image,
+  StyleSheet,
+  View,
+} from "react-native";
 
 interface Props {
   src: string;
 }
 
-export default function MidImageWithLoading({ src }: Props) {
+export default function LargeImage({ src }: Props) {
+  const screenWidth = Dimensions.get("window").width - 40;
   const [isLoading, setIsLoading] = useState(true);
 
   return (
-    <View className="w-48 h-48">
+    <View style={{ width: screenWidth, height: screenWidth }}>
       {isLoading && (
         <View
           style={[
@@ -22,7 +29,7 @@ export default function MidImageWithLoading({ src }: Props) {
       )}
       <Image
         source={{ uri: src }}
-        className="w-52 h-52"
+        style={{ width: screenWidth, height: screenWidth }}
         onLoad={() => setIsLoading(false)}
       />
     </View>

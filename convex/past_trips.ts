@@ -181,8 +181,60 @@ export const deletePhoto = mutation({
 
       return { success: true };
     } catch (error) {
-      console.error("Error deleting file:", error);
+      console.log("Error deleting file:", error);
       return { success: false, error: String(error) };
     }
+  },
+});
+
+export const leaveTrip = mutation({
+  args: {
+    userId: v.id("users"),
+    tripId: v.id("past_trips"),
+  },
+  handler: async (ctx, args) => {
+    const { tripId, userId } = args;
+    const pastTripUser = await ctx.db
+      .query("past_trip_users")
+      .withIndex("by_trip_and_user", (q) =>
+        q.eq("tripId", tripId).eq("userId", userId)
+      )
+      .first();
+
+    if (!pastTripUser) {
+      return {
+        success: false,
+        message: "No trip and user found",
+      };
+    }
+
+    await ctx.db.delete(pastTripUser._id);
+
+    const trip = await ctx.db
+      .query("past_trip_users")
+      .withIndex("by_trip", (q) => q.eq("tripId", tripId))
+      .first();
+
+    if (!trip) {
+      // there is no more users with this tripId
+
+      // delete the past_trip with this tripId
+      const pastTrip = await ctx.db.get(tripId);
+
+      // delete all photos from the file storage
+      if (pastTrip?.photos) {
+        for (const photoId of pastTrip.photos) {
+          await ctx.storage.delete(photoId as Id<"_storage">);
+        }
+      }
+
+      // Finally delete the trip itself
+      await ctx.db.delete(tripId);
+    }
+
+    return {
+      success: true,
+      message: "Trip association removed successfully",
+    };
   },
 });

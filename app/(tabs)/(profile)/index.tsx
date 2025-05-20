@@ -1,3 +1,4 @@
+import ProfileImage from "@/components/ProfileImage";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useAuth, useUser } from "@clerk/clerk-expo";
@@ -8,8 +9,6 @@ import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-  ActivityIndicator,
-  Image,
   ScrollView,
   Text,
   TextInput,
@@ -130,11 +129,7 @@ const Profile = () => {
               </Text>
               <Text className="text-sm text-gray-500">Welcome back</Text>
             </View>
-            {imageUrl ? (
-              <Image src={imageUrl} className="w-16 h-16 rounded-full" />
-            ) : (
-              <ActivityIndicator />
-            )}
+            <ProfileImage src={imageUrl as string} />
           </View>
         </View>
 
