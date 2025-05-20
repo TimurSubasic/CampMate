@@ -4,6 +4,7 @@ import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useUser } from "@clerk/clerk-expo";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
+import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { useMutation, useQuery } from "convex/react";
 import * as FileSystem from "expo-file-system";
 import * as ImagePicker from "expo-image-picker";
@@ -137,8 +138,8 @@ export default function Trip() {
                 {trip?.name}
               </Text>
               {trip?.description ? (
-                <Text className="text-lg font-light">
-                  Description: {trip?.description}
+                <Text className="text-lg font-light text-center">
+                  {trip?.description}
                 </Text>
               ) : (
                 <></>
@@ -147,12 +148,15 @@ export default function Trip() {
 
             {/* Location */}
             <View className="w-full flex flex-col gap-5">
-              <Text className=" font-semibold text-2xl">
-                Location: {trip?.location?.name}
-              </Text>
+              <View className="flex flex-row items-center justify-start gap-3">
+                <FontAwesome6 name="location-dot" size={24} color="black" />
+                <Text className=" font-semibold text-2xl">
+                  {trip?.location?.name}
+                </Text>
+              </View>
               {trip?.location?.description ? (
-                <Text className="text-lg font-light mt-5">
-                  Description: {trip?.location.description}
+                <Text className="text-lg font-light text-center">
+                  {trip?.location.description}
                 </Text>
               ) : (
                 <></>

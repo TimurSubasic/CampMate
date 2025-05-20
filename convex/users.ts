@@ -238,3 +238,29 @@ export const getUsersWithPhotosByPastTripId = query({
     return usersWithPhotos;
   },
 });
+
+export const deletePhoto = mutation({
+  args: {
+    id: v.id("users"),
+    storageId: v.id("_storage"),
+  },
+  handler: async (ctx, args) => {
+    if ((args.storageId as string) === "kg2f6gfmq2vvdbehah7bg1eh497g036z") {
+      return {
+        success: false,
+        message: "No profile photo",
+      };
+    }
+    try {
+      await ctx.storage.delete(args.storageId);
+      // change to basic photo
+      await ctx.db.patch(args.id, {
+        photo: "kg2f6gfmq2vvdbehah7bg1eh497g036z",
+      });
+      return { success: true };
+    } catch (error) {
+      console.error("Error deleting file:", error);
+      return { success: false, message: String(error) };
+    }
+  },
+});

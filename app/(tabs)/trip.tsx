@@ -6,7 +6,7 @@ import { useUser } from "@clerk/clerk-expo";
 import { useQuery } from "convex/react";
 import React from "react";
 
-export default function Trips() {
+export default function Trip() {
   const { user } = useUser();
 
   const clerkId = user?.id;

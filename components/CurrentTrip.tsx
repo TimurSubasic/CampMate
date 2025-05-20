@@ -1,6 +1,7 @@
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useUser } from "@clerk/clerk-expo";
+import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useMutation, useQuery } from "convex/react";
@@ -16,8 +17,10 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import Dialog from "react-native-dialog";
 import Toast from "react-native-toast-message";
 import Loading from "./Loading";
+import ProfileImage from "./ProfileImage";
 
 export default function CurrentTrip() {
   const tabBarHeight = useBottomTabBarHeight();
@@ -92,6 +95,49 @@ export default function CurrentTrip() {
     });
   };
 
+  // dialog to add items to checklist
+  const [visible, setVisible] = useState(false);
+  const [item, setItem] = useState("");
+  const [body, setBody] = useState("");
+
+  const handleExit = () => {
+    setVisible(false);
+    setItem("");
+    setBody("");
+  };
+
+  const addItem = useMutation(api.checklists.addItem);
+
+  const handleAddItem = async () => {
+    if (item.length >= 2) {
+      // check if user inputed
+
+      const success = await addItem({
+        tripId: trip!._id,
+        item: item,
+      });
+
+      if (!success.success) {
+        setBody(success.message);
+      } else setBody(success.message);
+
+      setItem("");
+    }
+  };
+
+  // Remove items from checklist
+  const [itemModal, setItemModal] = useState(false);
+
+  const deleteItem = useMutation(api.checklists.deleteItem);
+  const handleRemoveItem = async (item: string) => {
+    const success = await deleteItem({
+      tripId: trip!._id,
+      itemName: item,
+    });
+
+    console.log(success);
+  };
+
   // leave trip
   const leaveTrip = useMutation(api.trips.leaveTrip);
   const handleLeave = () => {
@@ -122,7 +168,7 @@ export default function CurrentTrip() {
     });
   };
 
-  if (users === undefined) {
+  if (users === undefined || checklist === undefined) {
     return <Loading />;
   }
 
@@ -140,8 +186,8 @@ export default function CurrentTrip() {
               {trip?.name}
             </Text>
             {trip?.description ? (
-              <Text className="text-lg font-light">
-                Description: {trip?.description}
+              <Text className="text-lg font-light text-center">
+                {trip?.description}
               </Text>
             ) : (
               <></>
@@ -149,12 +195,15 @@ export default function CurrentTrip() {
           </View>
 
           <View className="w-full flex flex-col gap-5">
-            <Text className=" font-semibold text-2xl">
-              Location: {trip?.location?.name}
-            </Text>
+            <View className="flex flex-row items-center justify-start gap-3">
+              <FontAwesome6 name="location-dot" size={24} color="black" />
+              <Text className=" font-semibold text-2xl">
+                {trip?.location?.name}
+              </Text>
+            </View>
             {trip?.location?.description ? (
-              <Text className="text-lg font-light mt-5">
-                Description: {trip?.location.description}
+              <Text className="text-lg font-light text-center">
+                {trip?.location.description}
               </Text>
             ) : (
               <></>
@@ -165,10 +214,10 @@ export default function CurrentTrip() {
               // preset location
               <TouchableOpacity
                 // onPress={ handleSeeDetails }
-                className="w-full rounded-lg bg-[#0D7377] p-5"
+                className="w-full rounded-lg bg-[#0D7377] p-5 my-5"
               >
                 <Text className="text-white font-bold text-xl text-center">
-                  See details
+                  See Location Details
                 </Text>
               </TouchableOpacity>
             )}
@@ -228,14 +277,35 @@ export default function CurrentTrip() {
               ))}
             </View>
 
-            <TouchableOpacity
-              // onPress={handleEdit}
-              className="w-full rounded-lg bg-[#0D7377] p-5 my-10"
-            >
-              <Text className="text-white font-bold text-xl text-center">
-                Edit Checklist
-              </Text>
-            </TouchableOpacity>
+            {checklist!.length > 0 ? (
+              <View className="w-full flex flex-row items-center justify-center gap-5">
+                <TouchableOpacity
+                  onPress={() => setItemModal(true)}
+                  className="flex-1 rounded-lg bg-red-600 p-5 my-10"
+                >
+                  <Text className="text-white font-bold text-xl text-center">
+                    Remove Items
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => setVisible(true)}
+                  className="flex-1 rounded-lg bg-[#0D7377] p-5 my-10"
+                >
+                  <Text className="text-white font-bold text-xl text-center">
+                    Add Items
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <TouchableOpacity
+                onPress={() => setVisible(true)}
+                className="w-full rounded-lg bg-[#0D7377] p-5 my-10"
+              >
+                <Text className="text-white font-bold text-xl text-center">
+                  Add Items
+                </Text>
+              </TouchableOpacity>
+            )}
           </View>
         </View>
 
@@ -281,6 +351,73 @@ export default function CurrentTrip() {
       </View>
 
       {/* Modals */}
+
+      {/* Remove items modal */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={itemModal}
+        onRequestClose={() => {
+          setKickModal(false);
+        }}
+      >
+        <BlurView
+          intensity={100}
+          tint="dark"
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+          }}
+        />
+        <View
+          className="flex-1 flex items-center justify-center"
+          style={{ marginBottom: tabBarHeight / 2 }}
+        >
+          <View className="w-[80%] h-[70%] -mt-[10%] bg-white rounded-xl p-5 ">
+            <View className="flex flex-row items-center justify-between">
+              <Text className="font-semibold text-lg">Remove Items</Text>
+              <TouchableOpacity onPress={() => setItemModal(false)}>
+                <MaterialIcons name="cancel" size={30} color="gray" />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={{
+                flexGrow: 1,
+              }}
+              keyboardShouldPersistTaps="handled"
+            >
+              <View className="flex flex-col w-full items-center justify-center gap-10 my-10">
+                {checklist!.length > 0 ? (
+                  checklist?.map((item, index) => (
+                    <View key={index}>
+                      <View className="w-full flex flex-row justify-between items-center border-b border-slate-600 pb-2">
+                        <View className="flex flex-row items-center justify-center gap-5">
+                          <Text className="text-lg font-semibold">
+                            {item.name}
+                          </Text>
+                        </View>
+                        <TouchableOpacity
+                          onPress={() => handleRemoveItem(item.name)}
+                          className=" rounded-lg bg-red-600 p-3 px-5"
+                        >
+                          <FontAwesome6 name="trash" size={30} color="white" />
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  ))
+                ) : (
+                  <Text>There are no items</Text>
+                )}
+              </View>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
 
       {/* Kick members Modal */}
       <Modal
@@ -328,10 +465,7 @@ export default function CurrentTrip() {
                       {user._id !== trip?.adminId ? (
                         <View className="w-full flex flex-row justify-between items-center">
                           <View className="flex flex-row items-center justify-center gap-5">
-                            <Image
-                              src={user.photoUrl as string}
-                              className="w-16 h-16 rounded-full"
-                            />
+                            <ProfileImage src={user.photoUrl as string} />
                             <Text className="text-lg font-semibold">
                               {user.username}
                             </Text>
@@ -361,6 +495,14 @@ export default function CurrentTrip() {
         </View>
       </Modal>
       <Toast />
+      {/** Dialog box create */}
+      <Dialog.Container visible={visible}>
+        <Dialog.Title>Add item to checklist</Dialog.Title>
+        <Dialog.Description> {body} </Dialog.Description>
+        <Dialog.Input onChangeText={setItem} value={item} />
+        <Dialog.Button label="Exit" onPress={handleExit} />
+        <Dialog.Button label="Add" onPress={handleAddItem} />
+      </Dialog.Container>
     </ScrollView>
   );
 }

@@ -3,6 +3,7 @@ import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useAuth, useUser } from "@clerk/clerk-expo";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { useMutation, useQuery } from "convex/react";
 import * as FileSystem from "expo-file-system";
 import * as ImagePicker from "expo-image-picker";
@@ -35,6 +36,8 @@ const Profile = () => {
   const changeUsername = useMutation(api.users.changeUsername);
 
   const deletePreviusPhoto = useMutation(api.users.deletePreviusPhoto);
+
+  const deletePhoto = useMutation(api.users.deletePhoto);
 
   const handleUsernameSave = () => {
     if (text.length >= 2) {
@@ -191,16 +194,24 @@ const Profile = () => {
                 Past Trips
               </Text>
             </TouchableOpacity>
-            <TouchableOpacity className="bg-white p-5 rounded-lg shadow flex-row items-center">
-              <FontAwesome
-                name="bell"
+
+            <TouchableOpacity
+              className="bg-white p-5 rounded-lg shadow flex-row items-center"
+              onPress={() =>
+                deletePhoto({
+                  id: fullUser!._id,
+                  storageId: fullUser!.photo as Id<"_storage">,
+                })
+              }
+            >
+              <MaterialCommunityIcons
+                name="camera-off"
                 size={24}
-                color="#0D7377"
+                color="#dc2626"
                 className="mr-4"
-                onPress={() => {}} // add actual something
               />
               <Text className="text-lg font-semibold text-gray-800">
-                Notifications // maybe
+                Remove Profile Photo
               </Text>
             </TouchableOpacity>
           </View>

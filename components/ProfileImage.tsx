@@ -17,7 +17,7 @@ export default function ProfileImage({ src }: Props) {
             { justifyContent: "center", alignItems: "center" },
           ]}
         >
-          <ActivityIndicator size={"large"} />
+          <ActivityIndicator size={"small"} />
         </View>
       )}
       <Image

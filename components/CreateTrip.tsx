@@ -232,7 +232,7 @@ export default function CreateTrip({ onCancel }: { onCancel: () => void }) {
                 onPress={() => setLocationModal(true)}
                 className="flex-1 flex flex-row items-center justify-between p-5 bg-white rounded-lg shadow"
               >
-                <Text>Browse...</Text>
+                <Text className="font-semibold">Browse...</Text>
                 <FontAwesome name="search" size={24} />
               </TouchableOpacity>
 
@@ -240,7 +240,7 @@ export default function CreateTrip({ onCancel }: { onCancel: () => void }) {
                 onPress={() => setCustomModal(true)}
                 className="flex-1 flex flex-row items-center justify-between p-5 bg-white rounded-lg shadow"
               >
-                <Text>Custom</Text>
+                <Text className="font-semibold">Custom</Text>
                 <FontAwesome name="edit" size={24} />
               </TouchableOpacity>
             </View>
@@ -262,7 +262,7 @@ export default function CreateTrip({ onCancel }: { onCancel: () => void }) {
               onPress={() => setChecklistModal(true)}
               className="w-full flex flex-row items-center justify-between p-5 bg-white rounded-lg shadow"
             >
-              <Text>Pick...</Text>
+              <Text className="font-semibold">Pick...</Text>
               <Octicons name="checklist" size={24} />
             </TouchableOpacity>
           </View>

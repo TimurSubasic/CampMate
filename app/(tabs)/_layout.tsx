@@ -1,17 +1,18 @@
-import FontAwesome from "@expo/vector-icons/FontAwesome";
+import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { Tabs } from "expo-router";
 
 export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
+        tabBarShowLabel: false,
         headerShown: false,
         tabBarActiveTintColor: "#F4A300",
         tabBarInactiveTintColor: "#1A1A1A",
         tabBarStyle: {
           backgroundColor: "#0D7377",
           paddingTop: 10,
-          height: 60,
+          height: 50,
           elevation: 0,
           paddingBottom: 10,
         },
@@ -22,7 +23,7 @@ export default function TabLayout() {
         options={{
           title: "Home",
           tabBarIcon: ({ color }) => (
-            <FontAwesome size={28} name="home" color={color} />
+            <FontAwesome6 size={26} name="house" color={color} />
           ),
         }}
       />
@@ -32,16 +33,16 @@ export default function TabLayout() {
         options={{
           title: "Map",
           tabBarIcon: ({ color }) => (
-            <FontAwesome size={28} name="globe" color={color} />
+            <FontAwesome6 size={26} name="map-location-dot" color={color} />
           ),
         }}
       />
       <Tabs.Screen
-        name="trips"
+        name="trip"
         options={{
-          title: "Trips",
+          title: "Trip",
           tabBarIcon: ({ color }) => (
-            <FontAwesome size={28} name="plus-circle" color={color} />
+            <FontAwesome6 name="campground" size={26} color={color} />
           ),
         }}
       />
@@ -50,7 +51,7 @@ export default function TabLayout() {
         options={{
           title: "Tutorial",
           tabBarIcon: ({ color }) => (
-            <FontAwesome size={28} name="book" color={color} />
+            <FontAwesome6 size={26} name="book" color={color} />
           ),
         }}
       />
@@ -59,7 +60,7 @@ export default function TabLayout() {
         options={{
           title: "Profile",
           tabBarIcon: ({ color }) => (
-            <FontAwesome size={28} name="user" color={color} />
+            <FontAwesome6 size={26} name="user-gear" color={color} />
           ),
         }}
       />
