@@ -74,7 +74,7 @@ export default function Index() {
           data={locations}
           key={"grid"}
           keyExtractor={(location) => location._id.toString()}
-          className="w-full"
+          className="w-full h-full"
           numColumns={2}
           contentContainerStyle={{ padding: 0, columnGap: 10 }}
           renderItem={({ item }) => (
@@ -105,7 +105,7 @@ export default function Index() {
           data={searchResults}
           key={"search"}
           keyExtractor={(location) => location._id.toString()}
-          className="w-full"
+          className="w-full h-full"
           renderItem={({ item }) => (
             <View
               className="w-full my-5 bg-gray-200/80 rounded-lg border border-slate-600"
