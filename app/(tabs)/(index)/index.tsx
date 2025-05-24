@@ -5,12 +5,12 @@ import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useQuery } from "convex/react";
 import React, { useRef, useState } from "react";
 import {
-  Dimensions,
-  FlatList,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    Dimensions,
+    FlatList,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 
 export default function Index() {
