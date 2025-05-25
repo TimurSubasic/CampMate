@@ -37,7 +37,7 @@ const Login = () => {
 
       <Image
         className="w-80 h-80 rounded-3xl "
-        source={require("../../assets/images/new-icon.png")}
+        source={require("../../assets/images/icon.png")}
       />
       <TouchableOpacity
         onPress={() => handleGoogleSignIn()}

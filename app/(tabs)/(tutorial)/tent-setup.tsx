@@ -4,18 +4,7 @@ import { router } from "expo-router";
 
 import React from "react";
 
-import {
-  Dimensions,
-  Image,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
-
-const { width } = Dimensions.get("window");
-
-const imageWidth = width - 32;
+import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 
 const steps = [
   {
