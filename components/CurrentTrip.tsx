@@ -183,338 +183,347 @@ export default function CurrentTrip() {
   }
 
   return (
-    <ScrollView
-      showsVerticalScrollIndicator={false}
-      contentContainerStyle={{ flexGrow: 1 }}
-      keyboardShouldPersistTaps="handled"
-    >
-      <View className="p-5 my-10 flex-1 items-center justify-between">
-        {/* Content */}
-        <View className="flex flex-col items-center justify-center gap-10 w-full">
-          <View className="w-full flex flex-col gap-5">
-            <Text className="text-center font-semibold text-3xl">
-              {trip?.name}
-            </Text>
-            {trip?.description ? (
-              <Text className="text-lg font-light text-center">
-                {trip?.description}
+    <View className="flex-1">
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ flexGrow: 1 }}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View className="p-5 my-10 flex-1 items-center justify-between">
+          {/* Content */}
+          <View className="flex flex-col items-center justify-center gap-10 w-full">
+            <View className="w-full flex flex-col gap-5">
+              <Text className="text-center font-semibold text-3xl">
+                {trip?.name}
               </Text>
-            ) : (
-              <></>
-            )}
-          </View>
-
-          <View className="w-full flex flex-col gap-5">
-            <View className="flex flex-row items-center justify-start gap-3">
-              <FontAwesome6 name="location-dot" size={24} color="black" />
-              <Text className=" font-semibold text-2xl">
-                {trip?.location?.name}
-              </Text>
-            </View>
-            {trip?.location?.description ? (
-              <Text className="text-lg font-light text-center">
-                {trip?.location.description}
-              </Text>
-            ) : (
-              <></>
-            )}
-            {trip?.isCustom ? (
-              <></>
-            ) : (
-              // preset location
-              <TouchableOpacity
-                onPress={() =>
-                  handleLocationPress(trip!.locationId as Id<"locations">)
-                }
-                className="w-full rounded-lg bg-[#0D7377] p-5 my-5"
-              >
-                <Text className="text-white font-bold text-xl text-center">
-                  See Location Details
+              {trip?.description ? (
+                <Text className="text-lg font-light text-center">
+                  {trip?.description}
                 </Text>
-              </TouchableOpacity>
-            )}
-          </View>
-
-          <View className="w-full flex flex-col gap-5">
-            <Text className="text-center font-semibold text-2xl">
-              Trip Members
-            </Text>
-
-            <View className="w-full flex flex-col items-center justify-center gap-5">
-              {users?.map((user, index) => (
-                <View
-                  key={index}
-                  className="w-full flex flex-row justify-between items-center"
-                >
-                  <Text className="text-lg font-semibold">{user.username}</Text>
-                  <Image
-                    src={user.photoUrl as string}
-                    className="w-16 h-16 rounded-full"
-                  />
-                </View>
-              ))}
+              ) : (
+                <></>
+              )}
             </View>
 
-            <TouchableOpacity
-              onPress={handleAdd}
-              className="w-full rounded-lg bg-[#0D7377] p-5 my-10"
-            >
-              <Text className="text-white font-bold text-xl text-center">
-                Add Members
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-          <View className="w-full flex flex-col gap-5">
-            <Text className="text-center font-semibold text-2xl">
-              Checklist
-            </Text>
-
-            <View className="w-full flex flex-col items-center justify-center gap-5">
-              {localChecklist?.map((item, index) => (
-                <View
-                  key={index}
-                  className="w-full flex flex-row justify-between items-center border-b border-slate-600 py-5"
-                >
-                  <Text className="text-lg font-semibold">{item.name}</Text>
-                  <Checkbox
-                    value={item.completed}
-                    color={"#0D7377"}
-                    className="p-3"
-                    onValueChange={(newValue) =>
-                      handleCheckboxChange(index, newValue)
-                    }
-                  />
-                </View>
-              ))}
-            </View>
-
-            {checklist!.length > 0 ? (
-              <View className="w-full flex flex-row items-center justify-center gap-5">
+            <View className="w-full flex flex-col gap-5">
+              <View className="flex flex-row items-center justify-start gap-3">
+                <FontAwesome6 name="location-dot" size={24} color="black" />
+                <Text className=" font-semibold text-2xl">
+                  {trip?.location?.name}
+                </Text>
+              </View>
+              {trip?.location?.description ? (
+                <Text className="text-lg font-light text-center">
+                  {trip?.location.description}
+                </Text>
+              ) : (
+                <></>
+              )}
+              {trip?.isCustom ? (
+                <></>
+              ) : (
+                // preset location
                 <TouchableOpacity
-                  onPress={() => setItemModal(true)}
-                  className="flex-1 rounded-lg bg-red-600 p-5 my-10"
+                  onPress={() =>
+                    handleLocationPress(trip!.locationId as Id<"locations">)
+                  }
+                  className="w-full rounded-lg bg-[#0D7377] p-5 my-5"
                 >
                   <Text className="text-white font-bold text-xl text-center">
-                    Remove Items
+                    See Location Details
                   </Text>
                 </TouchableOpacity>
+              )}
+            </View>
+
+            <View className="w-full flex flex-col gap-5">
+              <Text className="text-center font-semibold text-2xl">
+                Trip Members
+              </Text>
+
+              <View className="w-full flex flex-col items-center justify-center gap-5">
+                {users?.map((user, index) => (
+                  <View
+                    key={index}
+                    className="w-full flex flex-row justify-between items-center"
+                  >
+                    <Text className="text-lg font-semibold">
+                      {user.username}
+                    </Text>
+                    <Image
+                      src={user.photoUrl as string}
+                      className="w-16 h-16 rounded-full"
+                    />
+                  </View>
+                ))}
+              </View>
+
+              <TouchableOpacity
+                onPress={handleAdd}
+                className="w-full rounded-lg bg-[#0D7377] p-5 my-10"
+              >
+                <Text className="text-white font-bold text-xl text-center">
+                  Add Members
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            <View className="w-full flex flex-col gap-5">
+              <Text className="text-center font-semibold text-2xl">
+                Checklist
+              </Text>
+
+              <View className="w-full flex flex-col items-center justify-center gap-5">
+                {localChecklist?.map((item, index) => (
+                  <View
+                    key={index}
+                    className="w-full flex flex-row justify-between items-center border-b border-slate-600 py-5"
+                  >
+                    <Text className="text-lg font-semibold">{item.name}</Text>
+                    <Checkbox
+                      value={item.completed}
+                      color={"#0D7377"}
+                      className="p-3"
+                      onValueChange={(newValue) =>
+                        handleCheckboxChange(index, newValue)
+                      }
+                    />
+                  </View>
+                ))}
+              </View>
+
+              {checklist!.length > 0 ? (
+                <View className="w-full flex flex-row items-center justify-center gap-5">
+                  <TouchableOpacity
+                    onPress={() => setItemModal(true)}
+                    className="flex-1 rounded-lg bg-red-600 p-5 my-10"
+                  >
+                    <Text className="text-white font-bold text-xl text-center">
+                      Remove Items
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => setVisible(true)}
+                    className="flex-1 rounded-lg bg-[#0D7377] p-5 my-10"
+                  >
+                    <Text className="text-white font-bold text-xl text-center">
+                      Add Items
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              ) : (
                 <TouchableOpacity
                   onPress={() => setVisible(true)}
-                  className="flex-1 rounded-lg bg-[#0D7377] p-5 my-10"
+                  className="w-full rounded-lg bg-[#0D7377] p-5 my-10"
                 >
                   <Text className="text-white font-bold text-xl text-center">
                     Add Items
                   </Text>
                 </TouchableOpacity>
-              </View>
-            ) : (
+              )}
+            </View>
+          </View>
+
+          {/* Buttons */}
+          <View className="w-full flex flex-col items-center justify-center gap-5 mt-10">
+            <View className="h-3 w-full rounded-lg bg-red-600 mt-5" />
+            <TouchableOpacity
+              onPress={handleLeave}
+              className="w-full rounded-lg bg-red-600 p-5"
+            >
+              <Text className="text-white font-bold text-xl text-center">
+                Leave Trip
+              </Text>
+            </TouchableOpacity>
+            {trip?.adminId === fullUser?._id ? (
               <TouchableOpacity
-                onPress={() => setVisible(true)}
-                className="w-full rounded-lg bg-[#0D7377] p-5 my-10"
+                onPress={() => setKickModal(true)}
+                className="w-full rounded-lg bg-red-600 p-5"
               >
                 <Text className="text-white font-bold text-xl text-center">
-                  Add Items
+                  Kick Member
                 </Text>
               </TouchableOpacity>
+            ) : (
+              <></>
+            )}
+            {trip?.adminId === fullUser?._id ? (
+              <View className="w-full flex flex-col items-center justify-center gap-5">
+                <View className="h-3 w-full rounded-lg bg-red-600 mb-5" />
+                <TouchableOpacity
+                  onPress={handleCompleteTrip}
+                  className="w-full rounded-lg bg-[#F4A300] p-5 border-4 border-black "
+                >
+                  <Text className="text-black font-bold text-xl text-center">
+                    Complete Trip
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <></>
             )}
           </View>
         </View>
 
-        {/* Buttons */}
-        <View className="w-full flex flex-col items-center justify-center gap-5 mt-10">
-          <View className="h-3 w-full rounded-lg bg-red-600 mt-5" />
-          <TouchableOpacity
-            onPress={handleLeave}
-            className="w-full rounded-lg bg-red-600 p-5"
+        {/* Modals */}
+
+        {/* Remove items modal */}
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={itemModal}
+          onRequestClose={() => {
+            setKickModal(false);
+          }}
+        >
+          <BlurView
+            intensity={100}
+            tint="dark"
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+            }}
+          />
+          <View
+            className="flex-1 flex items-center justify-center"
+            style={{ marginBottom: tabBarHeight / 2 }}
           >
-            <Text className="text-white font-bold text-xl text-center">
-              Leave Trip
-            </Text>
-          </TouchableOpacity>
-          {trip?.adminId === fullUser?._id ? (
-            <TouchableOpacity
-              onPress={() => setKickModal(true)}
-              className="w-full rounded-lg bg-red-600 p-5"
-            >
-              <Text className="text-white font-bold text-xl text-center">
-                Kick Member
-              </Text>
-            </TouchableOpacity>
-          ) : (
-            <></>
-          )}
-          {trip?.adminId === fullUser?._id ? (
-            <View className="w-full flex flex-col items-center justify-center gap-5">
-              <View className="h-3 w-full rounded-lg bg-red-600 mb-5" />
-              <TouchableOpacity
-                onPress={handleCompleteTrip}
-                className="w-full rounded-lg bg-[#F4A300] p-5 border-4 border-black "
-              >
-                <Text className="text-black font-bold text-xl text-center">
-                  Complete Trip
-                </Text>
-              </TouchableOpacity>
-            </View>
-          ) : (
-            <></>
-          )}
-        </View>
-      </View>
-
-      {/* Modals */}
-
-      {/* Remove items modal */}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={itemModal}
-        onRequestClose={() => {
-          setKickModal(false);
-        }}
-      >
-        <BlurView
-          intensity={100}
-          tint="dark"
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-          }}
-        />
-        <View
-          className="flex-1 flex items-center justify-center"
-          style={{ marginBottom: tabBarHeight / 2 }}
-        >
-          <View className="w-[80%] h-[70%] -mt-[10%] bg-white rounded-xl p-5 ">
-            <View className="flex flex-row items-center justify-between">
-              <Text className="font-semibold text-lg">Remove Items</Text>
-              <TouchableOpacity onPress={() => setItemModal(false)}>
-                <MaterialIcons name="cancel" size={30} color="gray" />
-              </TouchableOpacity>
-            </View>
-
-            <ScrollView
-              showsVerticalScrollIndicator={false}
-              contentContainerStyle={{
-                flexGrow: 1,
-              }}
-              keyboardShouldPersistTaps="handled"
-            >
-              <View className="flex flex-col w-full items-center justify-center gap-10 my-10">
-                {checklist!.length > 0 ? (
-                  checklist?.map((item, index) => (
-                    <View key={index}>
-                      <View className="w-full flex flex-row justify-between items-center border-b border-slate-600 pb-2">
-                        <View className="flex flex-row items-center justify-center gap-5">
-                          <Text className="text-lg font-semibold">
-                            {item.name}
-                          </Text>
-                        </View>
-                        <TouchableOpacity
-                          onPress={() => handleRemoveItem(item.name)}
-                          className=" rounded-lg bg-red-600 p-3 px-5"
-                        >
-                          <FontAwesome6 name="trash" size={30} color="white" />
-                        </TouchableOpacity>
-                      </View>
-                    </View>
-                  ))
-                ) : (
-                  <Text>There are no items</Text>
-                )}
+            <View className="w-[80%] h-[70%] -mt-[10%] bg-white rounded-xl p-5 ">
+              <View className="flex flex-row items-center justify-between">
+                <Text className="font-semibold text-lg">Remove Items</Text>
+                <TouchableOpacity onPress={() => setItemModal(false)}>
+                  <MaterialIcons name="cancel" size={30} color="gray" />
+                </TouchableOpacity>
               </View>
-            </ScrollView>
-          </View>
-        </View>
-      </Modal>
 
-      {/* Kick members Modal */}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={kickModal}
-        onRequestClose={() => {
-          setKickModal(false);
-        }}
-      >
-        <BlurView
-          intensity={100}
-          tint="dark"
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-          }}
-        />
-        <View
-          className="flex-1 flex items-center justify-center"
-          style={{ marginBottom: tabBarHeight / 2 }}
-        >
-          <View className="w-[80%] h-[70%] -mt-[10%] bg-white rounded-xl p-5 ">
-            <View className="flex flex-row items-center justify-between">
-              <Text className="font-semibold text-lg">Kick Members</Text>
-              <TouchableOpacity onPress={() => setKickModal(false)}>
-                <MaterialIcons name="cancel" size={30} color="gray" />
-              </TouchableOpacity>
-            </View>
-
-            <ScrollView
-              showsVerticalScrollIndicator={false}
-              contentContainerStyle={{
-                flexGrow: 1,
-              }}
-              keyboardShouldPersistTaps="handled"
-            >
-              <View className="flex flex-col w-full items-center justify-center gap-10 my-10">
-                {users.length > 1 ? (
-                  users?.map((user, index) => (
-                    <View key={index}>
-                      {user._id !== trip?.adminId ? (
-                        <View className="w-full flex flex-row justify-between items-center">
+              <ScrollView
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={{
+                  flexGrow: 1,
+                }}
+                keyboardShouldPersistTaps="handled"
+              >
+                <View className="flex flex-col w-full items-center justify-center gap-10 my-10">
+                  {checklist!.length > 0 ? (
+                    checklist?.map((item, index) => (
+                      <View key={index}>
+                        <View className="w-full flex flex-row justify-between items-center border-b border-slate-600 pb-2">
                           <View className="flex flex-row items-center justify-center gap-5">
-                            <ProfileImage src={user.photoUrl as string} />
                             <Text className="text-lg font-semibold">
-                              {user.username}
+                              {item.name}
                             </Text>
                           </View>
                           <TouchableOpacity
-                            onPress={() => handleKick(user._id)}
-                            className=" rounded-lg bg-red-600 p-5 px-8"
+                            onPress={() => handleRemoveItem(item.name)}
+                            className=" rounded-lg bg-red-600 p-3 px-5"
                           >
-                            <Text className="text-white font-bold text-xl text-center">
-                              Kick
-                            </Text>
+                            <FontAwesome6
+                              name="trash"
+                              size={30}
+                              color="white"
+                            />
                           </TouchableOpacity>
                         </View>
-                      ) : (
-                        <></>
-                      )}
-                    </View>
-                  ))
-                ) : (
-                  <Text className="text-2xl font-bold text-center">
-                    You are the only member!
-                  </Text>
-                )}
-              </View>
-            </ScrollView>
+                      </View>
+                    ))
+                  ) : (
+                    <Text>There are no items</Text>
+                  )}
+                </View>
+              </ScrollView>
+            </View>
           </View>
-        </View>
-      </Modal>
+        </Modal>
+
+        {/* Kick members Modal */}
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={kickModal}
+          onRequestClose={() => {
+            setKickModal(false);
+          }}
+        >
+          <BlurView
+            intensity={100}
+            tint="dark"
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+            }}
+          />
+          <View
+            className="flex-1 flex items-center justify-center"
+            style={{ marginBottom: tabBarHeight / 2 }}
+          >
+            <View className="w-[80%] h-[70%] -mt-[10%] bg-white rounded-xl p-5 ">
+              <View className="flex flex-row items-center justify-between">
+                <Text className="font-semibold text-lg">Kick Members</Text>
+                <TouchableOpacity onPress={() => setKickModal(false)}>
+                  <MaterialIcons name="cancel" size={30} color="gray" />
+                </TouchableOpacity>
+              </View>
+
+              <ScrollView
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={{
+                  flexGrow: 1,
+                }}
+                keyboardShouldPersistTaps="handled"
+              >
+                <View className="flex flex-col w-full items-center justify-center gap-10 my-10">
+                  {users.length > 1 ? (
+                    users?.map((user, index) => (
+                      <View key={index}>
+                        {user._id !== trip?.adminId ? (
+                          <View className="w-full flex flex-row justify-between items-center">
+                            <View className="flex flex-row items-center justify-center gap-5">
+                              <ProfileImage src={user.photoUrl as string} />
+                              <Text className="text-lg font-semibold">
+                                {user.username}
+                              </Text>
+                            </View>
+                            <TouchableOpacity
+                              onPress={() => handleKick(user._id)}
+                              className=" rounded-lg bg-red-600 p-5 px-8"
+                            >
+                              <Text className="text-white font-bold text-xl text-center">
+                                Kick
+                              </Text>
+                            </TouchableOpacity>
+                          </View>
+                        ) : (
+                          <></>
+                        )}
+                      </View>
+                    ))
+                  ) : (
+                    <Text className="text-2xl font-bold text-center">
+                      You are the only member!
+                    </Text>
+                  )}
+                </View>
+              </ScrollView>
+            </View>
+          </View>
+        </Modal>
+
+        {/** Dialog box create */}
+        <Dialog.Container visible={visible}>
+          <Dialog.Title>Add item to checklist</Dialog.Title>
+          <Dialog.Description> {body} </Dialog.Description>
+          <Dialog.Input onChangeText={setItem} value={item} />
+          <Dialog.Button label="Exit" onPress={handleExit} />
+          <Dialog.Button label="Add" onPress={handleAddItem} />
+        </Dialog.Container>
+      </ScrollView>
       <Toast />
-      {/** Dialog box create */}
-      <Dialog.Container visible={visible}>
-        <Dialog.Title>Add item to checklist</Dialog.Title>
-        <Dialog.Description> {body} </Dialog.Description>
-        <Dialog.Input onChangeText={setItem} value={item} />
-        <Dialog.Button label="Exit" onPress={handleExit} />
-        <Dialog.Button label="Add" onPress={handleAddItem} />
-      </Dialog.Container>
-    </ScrollView>
+    </View>
   );
 }
