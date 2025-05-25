@@ -8,9 +8,11 @@ import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { useMutation, useQuery } from "convex/react";
 import * as FileSystem from "expo-file-system";
 import * as ImagePicker from "expo-image-picker";
+import * as MediaLibrary from "expo-media-library";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React from "react";
 import {
+  Alert,
   Dimensions,
   FlatList,
   Image,
@@ -19,6 +21,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import Toast from "react-native-toast-message";
 
 export default function Trip() {
   const { id } = useLocalSearchParams();
@@ -107,6 +110,72 @@ export default function Trip() {
     router.back();
   };
 
+  const handleSeeDetails = (id: Id<"locations">) => {
+    router.push({
+      pathname: "/locationDetails",
+      params: { locationId: id },
+    });
+  };
+
+  const downloadImage = async (imageUrl: string) => {
+    // Request permission to access media library
+    const { status } = await MediaLibrary.requestPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert("Permission denied", "Cannot save image without permission");
+      return;
+    }
+
+    Toast.show({
+      type: "info",
+      text1: "Image downloading!",
+      text1Style: {
+        fontSize: 18,
+      },
+      position: "top",
+      visibilityTime: 2500,
+    });
+
+    try {
+      // Step 1: Download to local cache directory
+      const fileUri = FileSystem.cacheDirectory + "downloaded-image.jpg";
+
+      const downloadedFile = await FileSystem.downloadAsync(imageUrl, fileUri);
+
+      // Step 2: Save to gallery
+      const asset = await MediaLibrary.createAssetAsync(downloadedFile.uri);
+      await MediaLibrary.createAlbumAsync("Download", asset, false); // saves in 'Download' album
+
+      Toast.show({
+        type: "success",
+        text1: "Image saved!",
+        text2: "Find it in your gallery!",
+        text1Style: {
+          fontSize: 18,
+        },
+        text2Style: {
+          fontSize: 16,
+        },
+        position: "top",
+        visibilityTime: 3000,
+      });
+    } catch (error) {
+      console.error("Download error:", error);
+      Toast.show({
+        type: "error",
+        text1: "Error accured",
+        text2: "Try again later!",
+        text1Style: {
+          fontSize: 18,
+        },
+        text2Style: {
+          fontSize: 16,
+        },
+        position: "top",
+        visibilityTime: 3000,
+      });
+    }
+  };
+
   if (users === undefined) {
     return <Loading />;
   }
@@ -166,7 +235,9 @@ export default function Trip() {
               ) : (
                 // preset location
                 <TouchableOpacity
-                  // onPress={ handleSeeDetails }
+                  onPress={() =>
+                    handleSeeDetails(trip!.locationId as Id<"locations">)
+                  }
                   className="w-full rounded-lg bg-[#0D7377] p-5"
                 >
                   <Text className="text-white font-bold text-xl text-center">
@@ -224,7 +295,10 @@ export default function Trip() {
                           style={{ width: screenWidth }}
                           className="flex flex-row items-center justify-center"
                         >
-                          <TouchableOpacity className="bg-[#0D7377] flex-1 rounded-bl-lg flex-row items-center justify-between p-3">
+                          <TouchableOpacity
+                            onPress={() => downloadImage(item.url as string)}
+                            className="bg-[#0D7377] flex-1 rounded-bl-lg flex-row items-center justify-between p-3"
+                          >
                             <Text className="font-bold text-white text-lg">
                               Save
                             </Text>
@@ -283,6 +357,7 @@ export default function Trip() {
           </View>
         </View>
       </ScrollView>
+      <Toast />
     </View>
   );
 }

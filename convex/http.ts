@@ -62,7 +62,7 @@ http.route({
         await ctx.runMutation(api.users.createUser, {
           username: name,
           email: email,
-          photo: "kg2f6gfmq2vvdbehah7bg1eh497g036z",
+          photo: "kg290fvdtc49na8q1detdq90717gkb78",
           clerkId: id,
           tripId: "",
         });

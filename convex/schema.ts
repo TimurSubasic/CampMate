@@ -46,6 +46,9 @@ export default defineSchema({
     latitude: v.number(),
     description: v.string(),
     photo: v.string(), // URL
+
+    averageRating: v.optional(v.number()),
+    totalRatings: v.optional(v.number()),
   })
     .index("by_name", ["name"])
     .searchIndex("search_name", {
@@ -63,32 +66,10 @@ export default defineSchema({
     description: v.string(),
   }),
 
-  plants: defineTable({
-    name: v.string(),
-    photo: v.string(),
-    description: v.string(),
-  }),
-
   location_animals: defineTable({
     locationId: v.string(),
     animalId: v.array(v.string()),
   }).index("by_location", ["locationId"]),
-
-  location_plants: defineTable({
-    locationId: v.string(),
-    plantId: v.array(v.string()),
-  }).index("by_location", ["locationId"]),
-
-  tutorials: defineTable({
-    title: v.string(),
-    type: v.string(),
-    content: v.array(
-      v.object({
-        text: v.string(), // map them one by one text then image
-        photo: v.string(),
-      })
-    ),
-  }),
 
   checklists: defineTable({
     tripId: v.string(),
@@ -109,4 +90,14 @@ export default defineSchema({
       })
     ),
   }),
+
+  location_ratings: defineTable({
+    locationId: v.string(),
+    userId: v.string(),
+    rating: v.number(),
+    comment: v.optional(v.string()),
+  })
+    .index("by_location", ["locationId"])
+    .index("by_user", ["userId"])
+    .index("by_location_and_user", ["locationId", "userId"]),
 });

@@ -1,8 +1,13 @@
-import { Stack } from "expo-router";
+import { Stack, useSegments } from "expo-router";
 
 export default function ProfileLayout() {
+  const segments = useSegments();
   return (
-    <Stack>
+    <Stack
+      screenOptions={{
+        animation: segments[1] === "(profile)" ? "default" : "none",
+      }}
+    >
       <Stack.Screen
         name="index"
         options={{

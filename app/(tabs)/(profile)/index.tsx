@@ -92,7 +92,7 @@ const Profile = () => {
 
         const previusPhoto = fullUser?.photo as Id<"_storage">;
 
-        if (previusPhoto !== "kg2f6gfmq2vvdbehah7bg1eh497g036z") {
+        if (previusPhoto !== "kg290fvdtc49na8q1detdq90717gkb78") {
           deletePreviusPhoto({
             storageId: previusPhoto,
           });

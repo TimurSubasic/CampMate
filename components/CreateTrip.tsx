@@ -21,6 +21,14 @@ export default function CreateTrip({ onCancel }: { onCancel: () => void }) {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
 
+  const [locationName, setLocationName] = useState<string | undefined>(
+    undefined
+  );
+
+  const [checklistName, setChecklistName] = useState<string | undefined>(
+    undefined
+  );
+
   const tabBarHeight = useBottomTabBarHeight();
 
   // modals
@@ -69,10 +77,12 @@ export default function CreateTrip({ onCancel }: { onCancel: () => void }) {
   // set pickedLocation
   const [pickedLocation, setPickedLocation] = useState("");
 
-  const handleLocationPick = (id: string) => {
+  const handleLocationPick = (id: string, name: string) => {
     setIsCustom(false);
 
     setPickedLocation(id);
+
+    setLocationName(name);
 
     setLocationModal(false);
 
@@ -90,6 +100,8 @@ export default function CreateTrip({ onCancel }: { onCancel: () => void }) {
       setCustomModal(false);
 
       setIsCustom(true);
+
+      setLocationName(customName);
 
       setHasLocation(true);
     }
@@ -156,9 +168,13 @@ export default function CreateTrip({ onCancel }: { onCancel: () => void }) {
     }
   };
 
-  const handleChecklistSave = (id: Id<"preset_cheklists">) => {
+  const handleChecklistSave = (id: Id<"preset_cheklists">, name: string) => {
     setPickedChecklist(id);
+
     setHasChecklist(true);
+
+    setChecklistName(name);
+
     setChecklistModal(false);
   };
 
@@ -219,7 +235,11 @@ export default function CreateTrip({ onCancel }: { onCancel: () => void }) {
             <View className="flex flex-row w-full items-start justify-between mt-5">
               <Text className="text-xl font-semibold">Location</Text>
               {hasLocation ? (
-                <View />
+                locationName === undefined ? (
+                  <View />
+                ) : (
+                  <Text>{locationName}</Text>
+                )
               ) : (
                 <Text className="font-semibold text-red-600">
                   Pick a location
@@ -250,7 +270,11 @@ export default function CreateTrip({ onCancel }: { onCancel: () => void }) {
             <View className="flex flex-row w-full items-start justify-between mt-5">
               <Text className="text-xl font-semibold">Cheklist</Text>
               {hasChecklist ? (
-                <View />
+                checklistName === undefined ? (
+                  <View />
+                ) : (
+                  <Text>{checklistName}</Text>
+                )
               ) : (
                 <Text className="font-semibold text-red-600">
                   Pick a Checklist
@@ -343,7 +367,9 @@ export default function CreateTrip({ onCancel }: { onCancel: () => void }) {
                     renderItem={({ item }) => (
                       <View className=" w-full mb-5">
                         <TouchableOpacity
-                          onPress={() => handleLocationPick(item._id)}
+                          onPress={() =>
+                            handleLocationPick(item._id, item.name)
+                          }
                           className="border bg-gray-200/80 border-slate-600 w-full p-5 rounded-lg "
                         >
                           <Text className="font-semibold text-lg">
@@ -368,7 +394,9 @@ export default function CreateTrip({ onCancel }: { onCancel: () => void }) {
                     renderItem={({ item }) => (
                       <View className=" w-full mb-5">
                         <TouchableOpacity
-                          onPress={() => handleLocationPick(item._id)}
+                          onPress={() =>
+                            handleLocationPick(item._id, item.name)
+                          }
                           className="border bg-gray-200/80 border-slate-600 w-full p-5 rounded-lg "
                         >
                           <Text className="font-semibold text-lg">
@@ -505,7 +533,7 @@ export default function CreateTrip({ onCancel }: { onCancel: () => void }) {
                 keyExtractor={(item) => item._id.toString()}
                 renderItem={({ item }) => (
                   <TouchableOpacity
-                    onPress={() => handleChecklistSave(item._id)}
+                    onPress={() => handleChecklistSave(item._id, item.name)}
                     className="w-full flex flex-row items-center justify-between border bg-gray-200/80 border-slate-600 p-5 rounded-lg mb-5"
                   >
                     <Text className="text-lg font-medium">{item.name}</Text>

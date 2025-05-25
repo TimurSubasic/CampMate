@@ -8,6 +8,7 @@ import { useMutation, useQuery } from "convex/react";
 import { BlurView } from "expo-blur";
 import { Checkbox } from "expo-checkbox";
 import * as Clipboard from "expo-clipboard";
+import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   Image,
@@ -23,6 +24,8 @@ import Loading from "./Loading";
 import ProfileImage from "./ProfileImage";
 
 export default function CurrentTrip() {
+  const router = useRouter();
+
   const tabBarHeight = useBottomTabBarHeight();
 
   const { user } = useUser();
@@ -168,6 +171,13 @@ export default function CurrentTrip() {
     });
   };
 
+  const handleLocationPress = (id: Id<"locations">) => {
+    router.push({
+      pathname: "/locationDetails",
+      params: { locationId: id },
+    });
+  };
+
   if (users === undefined || checklist === undefined) {
     return <Loading />;
   }
@@ -213,7 +223,9 @@ export default function CurrentTrip() {
             ) : (
               // preset location
               <TouchableOpacity
-                // onPress={ handleSeeDetails }
+                onPress={() =>
+                  handleLocationPress(trip!.locationId as Id<"locations">)
+                }
                 className="w-full rounded-lg bg-[#0D7377] p-5 my-5"
               >
                 <Text className="text-white font-bold text-xl text-center">

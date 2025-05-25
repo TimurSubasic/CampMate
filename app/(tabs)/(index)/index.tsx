@@ -1,8 +1,10 @@
 import Loading from "@/components/Loading";
 import MidImageWithLoading from "@/components/MidImage";
 import { api } from "@/convex/_generated/api";
+import { Id } from "@/convex/_generated/dataModel";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useQuery } from "convex/react";
+import { useRouter } from "expo-router";
 import React, { useRef, useState } from "react";
 import {
   Dimensions,
@@ -14,6 +16,7 @@ import {
 } from "react-native";
 
 export default function Index() {
+  const router = useRouter();
   // width for cards
   const screenWidth = (Dimensions.get("window").width - 60) / 2;
 
@@ -41,6 +44,13 @@ export default function Index() {
     searchTimeoutRef.current = setTimeout(() => {
       setDebouncedSearch(text);
     }, 300);
+  };
+
+  const handleLocationPress = (id: Id<"locations">) => {
+    router.push({
+      pathname: "/locationDetails",
+      params: { locationId: id },
+    });
   };
 
   if (locations === undefined) {
@@ -84,7 +94,10 @@ export default function Index() {
               }}
               className="mr-5 my-5 bg-gray-200/80 rounded-lg border border-slate-600"
             >
-              <TouchableOpacity className="flex-1 flex items-center justify-start gap-5">
+              <TouchableOpacity
+                onPress={() => handleLocationPress(item._id)}
+                className="flex-1 flex items-center justify-start gap-5"
+              >
                 <MidImageWithLoading src={item.imageUrl as string} />
 
                 <View className="p-5 w-52">
@@ -111,7 +124,10 @@ export default function Index() {
               className="w-full my-5 bg-gray-200/80 rounded-lg border border-slate-600"
               style={{ height: screenWidth }}
             >
-              <TouchableOpacity className="w-full flex flex-row items-start justify-start">
+              <TouchableOpacity
+                onPress={() => handleLocationPress(item._id)}
+                className="w-full flex flex-row items-start justify-start"
+              >
                 <MidImageWithLoading src={item.imageUrl as string} />
 
                 <View className="p-5 flex-1">

@@ -58,6 +58,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="(profile)"
         options={{
+          popToTopOnBlur: true,
           title: "Profile",
           tabBarIcon: ({ color }) => (
             <FontAwesome6 size={26} name="user-gear" color={color} />

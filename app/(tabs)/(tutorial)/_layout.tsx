@@ -2,7 +2,11 @@ import { Stack } from "expo-router";
 
 export default function TutorialLayout() {
   return (
-    <Stack>
+    <Stack
+      screenOptions={{
+        headerShown: false,
+      }}
+    >
       <Stack.Screen
         name="index"
         options={{
@@ -10,21 +14,21 @@ export default function TutorialLayout() {
         }}
       />
       <Stack.Screen
-        name="tutorial"
+        name="tent-setup"
         options={{
-          title: "Tutorial",
+          headerShown: false,
         }}
       />
       <Stack.Screen
-        name="compass"
+        name="campfire"
         options={{
-          title: "Compass",
+          headerShown: false,
         }}
       />
       <Stack.Screen
-        name="barometer"
+        name="trail-signs"
         options={{
-          title: "Barometer",
+          headerShown: false,
         }}
       />
     </Stack>

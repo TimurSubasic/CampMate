@@ -116,7 +116,7 @@ export const getImageUrl = query({
   args: { storageId: v.optional(v.id("_storage")) },
   handler: async (ctx, args) => {
     if (!args.storageId) {
-      return "kg2f6gfmq2vvdbehah7bg1eh497g036z";
+      return "kg290fvdtc49na8q1detdq90717gkb78";
     }
     return await ctx.storage.getUrl(args.storageId);
   },
@@ -170,7 +170,7 @@ export const getUsersWithPhotosByTripId = query({
         } else {
           // For default photo, also use proper typing
           const defaultPhotoId =
-            "kg2f6gfmq2vvdbehah7bg1eh497g036z" as Id<"_storage">;
+            "kg290fvdtc49na8q1detdq90717gkb78" as Id<"_storage">;
           photoUrl = await ctx.storage.getUrl(defaultPhotoId);
         }
 
@@ -224,7 +224,7 @@ export const getUsersWithPhotosByPastTripId = query({
           } else {
             // For default photo, also use proper typing
             const defaultPhotoId =
-              "kg2f6gfmq2vvdbehah7bg1eh497g036z" as Id<"_storage">;
+              "kg290fvdtc49na8q1detdq90717gkb78" as Id<"_storage">;
             photoUrl = await ctx.storage.getUrl(defaultPhotoId);
           }
 
@@ -245,7 +245,7 @@ export const deletePhoto = mutation({
     storageId: v.id("_storage"),
   },
   handler: async (ctx, args) => {
-    if ((args.storageId as string) === "kg2f6gfmq2vvdbehah7bg1eh497g036z") {
+    if ((args.storageId as string) === "kg290fvdtc49na8q1detdq90717gkb78") {
       return {
         success: false,
         message: "No profile photo",
@@ -255,7 +255,7 @@ export const deletePhoto = mutation({
       await ctx.storage.delete(args.storageId);
       // change to basic photo
       await ctx.db.patch(args.id, {
-        photo: "kg2f6gfmq2vvdbehah7bg1eh497g036z",
+        photo: "kg290fvdtc49na8q1detdq90717gkb78",
       });
       return { success: true };
     } catch (error) {
