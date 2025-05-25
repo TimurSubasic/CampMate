@@ -16,10 +16,9 @@
    npm install
    ```
 
-2. Create .env.local
+2. Create .env.local<br>
 
-   Copy from our
-   LaTeX doc
+   Copy from our LaTeX doc
 
 3. Start the app
 
@@ -27,10 +26,11 @@
    npx expo start
    ```
 
-4. Download Expo Go
+4. Download Expo Go<br>
 
-   Scan the QR-code
-   IOS from the camera
-   Android from the app
+   Scan the QR-code<br>
+   IOS from the camera<br>
+   Android from the app<br>
+   <br>
 
 5. Log In and enjoy
