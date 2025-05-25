@@ -25,7 +25,6 @@ export default function LocationDetails() {
   const locations = useQuery(api.locations.getAll);
   const location = locations?.find((loc) => loc._id === locationId);
   const [comment, setComment] = useState("");
-  const [tempRating, setTempRating] = useState(0);
 
   // Get ratings for this location
   const ratings = useQuery(api.location_ratings.getRatingsByLocation, {
@@ -37,6 +36,8 @@ export default function LocationDetails() {
     locationId: locationId as string,
     userId: user?.id || "",
   });
+
+  const [tempRating, setTempRating] = useState(userRating?.rating || 0);
 
   const rateLocation = useMutation(api.location_ratings.rateLocation);
   const deleteRating = useMutation(api.location_ratings.deleteRating);
@@ -56,12 +57,12 @@ export default function LocationDetails() {
     });
 
     setComment("");
-    setTempRating(0);
   };
 
   const handleDeleteRating = async (ratingId: string) => {
     if (!user?.id) return;
     await deleteRating({ ratingId });
+    setTempRating(0);
   };
 
   // Get the image URL from Convex storage
@@ -190,7 +191,7 @@ export default function LocationDetails() {
           {/* User Rating Section */}
           <KeyboardAvoidingView
             behavior={Platform.OS === "ios" ? "padding" : "height"}
-            className="h-[50%]"
+            className="flex-1"
           >
             {user?.id && (
               <View className="mt-5 p-4 bg-gray-50 rounded-lg">
@@ -198,7 +199,7 @@ export default function LocationDetails() {
                   Your Rating
                 </Text>
                 <Rating
-                  rating={userRating?.rating || tempRating}
+                  rating={tempRating}
                   interactive={true}
                   onRate={handleRate}
                   size="large"
