@@ -2,8 +2,13 @@
 
 0. Clone the repo
 
+   ```bash
    git clone https://github.com/TimurSubasic/CampMate.git
+   ```
+
+   ```bash
    cd CampMate
+   ```
 
 1. Install dependencies
 
