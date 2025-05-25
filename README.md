@@ -18,7 +18,7 @@
 
 2. Create .env.local<br>
 
-   Copy from our LaTeX doc
+   Copy from our LaTeX doc<br>
 
 3. Start the app
 
