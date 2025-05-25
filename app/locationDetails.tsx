@@ -207,6 +207,7 @@ export default function LocationDetails() {
                   className="mt-2.5 p-2.5 bg-white rounded-lg border border-gray-300 min-h-[80px]"
                   style={{ textAlignVertical: "top" }}
                   placeholder="Add a comment (optional)"
+                  placeholderTextColor={"#475569"}
                   value={comment}
                   onChangeText={setComment}
                   multiline
