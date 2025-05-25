@@ -1,3 +1,4 @@
+import Loading from "@/components/Loading";
 import { api } from "@/convex/_generated/api";
 import { Ionicons } from "@expo/vector-icons";
 import { useQuery } from "convex/react";
@@ -86,6 +87,10 @@ export default function Map() {
     const index = Math.round(heading / 45) % 8;
     return directions[index];
   };
+
+  if (locations === undefined) {
+    return <Loading />;
+  }
 
   return (
     <View style={styles.container}>
